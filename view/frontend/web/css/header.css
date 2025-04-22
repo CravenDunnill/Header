@@ -1,0 +1,278 @@
+/* CravenDunnill Header Styles */
+
+/* Common styles for both mobile and desktop */
+.cd-header-container {
+	width: 100%;
+	position: relative;
+	z-index: 1000;
+}
+
+/* Cart counter bubble */
+.cd-cart-counter {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background-color: #DB804A;
+	display: block;
+}
+
+/* Header icons common styles */
+.cd-header-icon,
+.cd-header-icon-mobile {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
+	color: #122C58;
+	cursor: pointer;
+}
+
+/* Logo and tagline */
+.cd-logo {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-decoration: none;
+}
+
+.cd-tagline {
+	font-size: 10px;
+	color: #122C58;
+	letter-spacing: 1px;
+	font-weight: 500;
+	margin-top: 2px;
+}
+
+/* Search panel */
+.cd-search-panel {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	width: 100%;
+	background: #fff;
+	padding: 20px;
+	box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+	display: none;
+	z-index: 1001;
+}
+
+.cd-search-panel.active {
+	display: block !important;
+}
+
+.cd-search-panel-inner {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.cd-search-form {
+	display: flex;
+	position: relative;
+}
+
+.cd-search-input-wrapper {
+	flex: 1;
+	position: relative;
+}
+
+.cd-search-input {
+	width: 100%;
+	height: 50px;
+	padding: 0 50px 0 15px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 16px;
+}
+
+.cd-search-submit {
+	position: absolute;
+	right: 5px;
+	top: 50%;
+	transform: translateY(-50%);
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 10px;
+}
+
+.cd-search-close {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0 10px;
+	margin-left: 10px;
+}
+
+/* Mini Cart */
+.cd-minicart {
+	position: fixed;
+	top: 0;
+	right: -100%;
+	height: 100%;
+	background: #fff;
+	box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+	transition: right 0.3s ease;
+	z-index: 1002;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.cd-minicart.active {
+	right: 0;
+}
+
+.cd-minicart-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 15px 20px;
+	border-bottom: 1px solid #eee;
+}
+
+.cd-minicart-header h3 {
+	margin: 0;
+	font-size: 18px;
+	color: #122C58;
+}
+
+.cd-minicart-close {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 5px;
+}
+
+.cd-minicart-content {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px;
+}
+
+/* Overlay */
+.cd-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.5);
+	z-index: 999;
+	display: none;
+}
+
+.cd-overlay.active {
+	display: block;
+}
+
+/* Mobile Header */
+.cd-header-mobile {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 15px;
+	background: #fff;
+	border-bottom: 1px solid #eee;
+}
+
+.cd-header-mobile-left {
+	display: flex;
+	align-items: center;
+}
+
+.cd-header-mobile-center {
+	display: flex;
+	align-items: center;
+}
+
+.cd-menu-button {
+	margin-right: 15px;
+	cursor: pointer;
+}
+
+.cd-logo-mobile {
+	display: flex;
+	align-items: center;
+	text-decoration: none;
+}
+
+.cd-search-button-mobile {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #122C58;
+	text-decoration: none;
+}
+
+.cd-header-mobile-right {
+	display: flex;
+	align-items: center;
+}
+
+.cd-header-icon-mobile {
+	margin-left: 20px;
+	position: relative;
+}
+
+.cd-cart-icon-wrapper {
+	position: relative;
+}
+
+/* Desktop Header */
+.cd-header-desktop {
+	display: none;
+}
+
+/* Desktop styles */
+@media screen and (min-width: 768px) {
+	.cd-header-mobile {
+		display: none;
+	}
+
+	.cd-header-desktop {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 20px 30px;
+		background: #fff;
+		border-bottom: 1px solid #eee;
+		max-width: var(--container-max-width, 1280px);
+		margin: 0 auto;
+	}
+
+	.cd-header-left,
+	.cd-header-right {
+		display: flex;
+		align-items: center;
+	}
+
+	.cd-header-icon {
+		margin-left: 30px;
+	}
+
+	.cd-header-icon span {
+		margin-top: 5px;
+		font-size: 12px;
+	}
+
+	.cd-search-button {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		cursor: pointer;
+	}
+	
+	.cd-search-button span {
+		margin-top: 5px;
+		font-size: 12px;
+	}
+	
+	/* Mini cart - desktop specific */
+	.cd-minicart {
+		width: 400px;
+	}
+}

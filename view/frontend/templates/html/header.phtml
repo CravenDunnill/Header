@@ -1,0 +1,153 @@
+<?php
+/**
+ * @var $block \CravenDunnill\Header\Block\Html\Header
+ */
+?>
+<div class="cd-header-container">
+	<!-- Desktop Header -->
+	<div class="cd-header-desktop">
+		<div class="cd-header-left">
+			<a href="#" class="cd-search-button" id="cd-search-button">
+				<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="11" cy="11" r="8"></circle>
+					<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+				</svg>
+				<span>Search</span>
+			</a>
+		</div>
+		
+		<div class="cd-header-center">
+			<a class="cd-logo" href="<?= $block->getBaseUrl() ?>">
+				<img src="<?= $block->getViewFileUrl('CravenDunnill_Header::images/logo.svg') ?>" alt="Craven Dunnill" height="30">
+				<div class="cd-tagline">SINCE 1872</div>
+			</a>
+		</div>
+		
+		<div class="cd-header-right">
+			<a class="cd-header-icon" href="<?= $block->getWishlistUrl() ?>">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+				</svg>
+				<span>Your Project</span>
+			</a>
+			
+			<a class="cd-header-icon" href="<?= $block->getAccountUrl() ?>">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+					<circle cx="12" cy="7" r="4"></circle>
+				</svg>
+				<span>Account</span>
+			</a>
+			
+			<div class="cd-header-icon cd-cart-trigger" id="cd-cart-trigger">
+				<div class="cd-cart-icon-wrapper">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="9" cy="21" r="1"></circle>
+						<circle cx="20" cy="21" r="1"></circle>
+						<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+					</svg>
+					<?php if ($block->getCartItemCount() > 0): ?>
+						<span class="cd-cart-counter"></span>
+					<?php endif; ?>
+				</div>
+				<span>Trolley</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Mobile Header -->
+	<div class="cd-header-mobile">
+		<div class="cd-header-mobile-left">
+			<div class="cd-menu-button" id="cd-menu-button">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="3" y1="12" x2="21" y2="12"></line>
+					<line x1="3" y1="6" x2="21" y2="6"></line>
+					<line x1="3" y1="18" x2="21" y2="18"></line>
+				</svg>
+			</div>
+			<a class="cd-logo-mobile" href="<?= $block->getBaseUrl() ?>">
+				<img src="<?= $block->getViewFileUrl('CravenDunnill_Header::images/logo.svg') ?>" alt="Craven Dunnill" height="30">
+			</a>
+		</div>
+		
+		<div class="cd-header-mobile-center">
+			<a href="#" class="cd-search-button-mobile" id="cd-search-button-mobile">
+				<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="11" cy="11" r="8"></circle>
+					<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+				</svg>
+			</a>
+		</div>
+		
+		<div class="cd-header-mobile-right">
+			<a class="cd-header-icon-mobile" href="<?= $block->getWishlistUrl() ?>">
+				<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+				</svg>
+			</a>
+			
+			<a class="cd-header-icon-mobile" href="<?= $block->getAccountUrl() ?>">
+				<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+					<circle cx="12" cy="7" r="4"></circle>
+				</svg>
+			</a>
+			
+			<div class="cd-header-icon-mobile cd-cart-trigger" id="cd-cart-trigger-mobile">
+				<div class="cd-cart-icon-wrapper">
+					<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="9" cy="21" r="1"></circle>
+						<circle cx="20" cy="21" r="1"></circle>
+						<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+					</svg>
+					<?php if ($block->getCartItemCount() > 0): ?>
+						<span class="cd-cart-counter"></span>
+					<?php endif; ?>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- Search Panel -->
+	<div class="cd-search-panel" id="cd-search-panel" style="display: none;">
+		<div class="cd-search-panel-inner">
+			<form class="cd-search-form" action="<?= $block->getSearchUrl() ?>" method="get">
+				<div class="cd-search-input-wrapper">
+					<input type="text" name="q" id="cd-search-input" class="cd-search-input" placeholder="Search products...">
+					<button type="submit" class="cd-search-submit">
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="11" cy="11" r="8"></circle>
+							<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+						</svg>
+					</button>
+				</div>
+				<button type="button" class="cd-search-close" id="cd-search-close">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</button>
+			</form>
+		</div>
+	</div>
+	
+	<!-- Mini Cart -->
+	<div class="cd-minicart" id="cd-minicart">
+		<div class="cd-minicart-header">
+			<h3>Your Trolley</h3>
+			<button type="button" class="cd-minicart-close" id="cd-minicart-close">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
+		</div>
+		<div class="cd-minicart-content" data-mage-init='{"Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>}'>
+			<!-- Minicart content will be dynamically loaded here -->
+			<div id="minicart-content-wrapper"></div>
+		</div>
+	</div>
+	
+	<!-- Overlay -->
+	<div class="cd-overlay" id="cd-overlay"></div>
+</div>
