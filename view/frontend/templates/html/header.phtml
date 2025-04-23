@@ -131,7 +131,7 @@
 		</div>
 	</div>
 	
-	<!-- Mini Cart - Simplified Structure -->
+	<!-- Mini Cart - With Footer Buttons -->
 	<div class="cd-minicart" id="cd-minicart">
 		<div class="cd-minicart-header">
 			<h3>Your Trolley</h3>
@@ -143,16 +143,96 @@
 			</button>
 		</div>
 		<div class="cd-minicart-content">
-			<div id="minicart-content-wrapper" data-bind="scope: 'minicart_content'">
-				<!-- ko template: getTemplate() --><!-- /ko -->
-			</div>
-			<script type="text/x-magento-init">
-			{
-				"#minicart-content-wrapper": {
-					"Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+			<!-- Start: Simple direct cart items rendering - no Knockout -->
+			<div class="cd-minicart-items">
+				<?php
+				// Get cart items directly
+				$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+				$cart = $objectManager->get('\Magento\Checkout\Model\Cart');
+				$items = $cart->getQuote()->getAllVisibleItems();
+				
+				// Get price helper for currency formatting
+				$priceHelper = $objectManager->get(\Magento\Framework\Pricing\Helper\Data::class);
+				
+				if (count($items) > 0) {
+					foreach($items as $item) {
+						// Get product
+						$product = $objectManager->create('Magento\Catalog\Model\Product')->load($item->getProduct()->getId());
+						
+						// Get product image
+						$imageHelper = $objectManager->get('\Magento\Catalog\Helper\Image');
+						$imageUrl = $imageHelper->init($product, 'product_page_image_small')
+										->setImageFile($product->getImage())
+										->resize(75, 75)
+										->getUrl();
+						
+						// Get product URL
+						$productUrl = $product->getProductUrl();
+						
+						// Format price properly
+						$price = $priceHelper->currency($item->getPrice(), true, false);
+						
+						// Output item HTML
+						?>
+						<div class="cd-product-item">
+							<div class="cd-product-image">
+								<a href="<?php echo $productUrl; ?>">
+									<img src="<?php echo $imageUrl; ?>" alt="<?php echo $item->getName(); ?>" width="75" height="75">
+								</a>
+							</div>
+							<div class="cd-product-details">
+								<div class="cd-product-name">
+									<a href="<?php echo $productUrl; ?>"><?php echo $item->getName(); ?></a>
+								</div>
+								<div class="cd-product-price">
+									<?php echo $price; ?>
+								</div>
+								<div class="cd-product-qty">
+									Qty: <?php echo (int)$item->getQty(); ?>
+								</div>
+							</div>
+						</div>
+						<?php
+					}
+				} else {
+					?>
+					<div class="cd-empty-cart">
+						<p>You have no items in your trolley.</p>
+					</div>
+					<?php
 				}
-			}
-			</script>
+				?>
+			</div>
+			<!-- End: Simple direct cart items rendering -->
+		</div>
+		
+		<!-- Mini Cart Footer with Subtotal and Buttons -->
+		<div class="cd-minicart-footer">
+			<!-- Subtotal Container -->
+			<div class="cd-minicart-subtotal" id="cd-minicart-subtotal">
+				<?php 
+				// Get cart totals directly
+				$quote = $cart->getQuote();
+				$subtotal = $quote->getSubtotal();
+				
+				// Format subtotal properly using price helper
+				$formattedSubtotal = $priceHelper->currency($subtotal, true, false);
+				?>
+				<div class="subtotal">
+					<span class="label">Subtotal</span>
+					<span class="price"><?php echo $formattedSubtotal; ?></span>
+				</div>
+			</div>
+			
+			<!-- Buttons Container -->
+			<div class="cd-minicart-buttons">
+				<a href="<?= $block->getCartUrl() ?>" class="cd-minicart-button cd-view-cart">
+					View Cart
+				</a>
+				<a href="<?= $block->getUrl('checkout') ?>" class="cd-minicart-button cd-checkout">
+					Checkout
+				</a>
+			</div>
 		</div>
 	</div>
 	
@@ -360,7 +440,7 @@
 	
 	<!-- Direct Mini Cart JavaScript -->
 	<script>
-	require(['jquery', 'Magento_Customer/js/customer-data'], function($, customerData) {
+	require(['jquery'], function($) {
 		'use strict';
 		
 		$(document).ready(function() {
@@ -376,9 +456,6 @@
 				
 				// Show overlay
 				$('#cd-overlay').css('display', 'block');
-				
-				// Force reload cart data
-				customerData.reload(['cart'], false);
 				
 				// Apply blur effect to content
 				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
@@ -415,27 +492,6 @@
 				// Remove blur effect
 				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
 			});
-			
-			// Update cart counter
-			function updateCartCounter() {
-				var cartData = customerData.get('cart');
-				
-				if (cartData() && cartData().summary_count > 0) {
-					console.log('Cart has items: ' + cartData().summary_count);
-					$('.cd-cart-counter').show();
-				} else {
-					$('.cd-cart-counter').hide();
-				}
-			}
-			
-			// Initialize cart counter
-			var cartData = customerData.get('cart');
-			cartData.subscribe(function() {
-				updateCartCounter();
-			});
-			
-			// Initial update
-			updateCartCounter();
 			
 			// Escape key handler
 			$(document).keyup(function(e) {

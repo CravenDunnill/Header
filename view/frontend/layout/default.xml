@@ -50,5 +50,24 @@
 				</arguments>
 			</block>
 		</referenceContainer>
+		
+		<!-- Make sure Magento's standard minicart is also available -->
+		<referenceBlock name="minicart">
+			<arguments>
+				<argument name="jsLayout" xsi:type="array">
+					<item name="components" xsi:type="array">
+						<item name="minicart_content" xsi:type="array">
+							<item name="children" xsi:type="array">
+								<item name="item.renderer" xsi:type="array">
+									<item name="config" xsi:type="array">
+										<item name="displayArea" xsi:type="string">defaultRenderer</item>
+									</item>
+								</item>
+							</item>
+						</item>
+					</item>
+				</argument>
+			</arguments>
+		</referenceBlock>
 	</body>
 </page>

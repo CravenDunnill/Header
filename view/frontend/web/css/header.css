@@ -182,26 +182,153 @@ html, body {
 	flex: 1;
 	overflow-y: auto;
 	padding: 20px;
-	min-height: 200px;
+	min-height: 100px;
+	max-height: calc(100vh - 195px); /* Adjusted to accommodate the larger footer */
+	overflow-y: auto;
 }
 
-/* Override Magento styles */
-.cd-minicart #minicart-content-wrapper .block-minicart {
-	width: 100% !important;
-	height: auto !important;
-	position: relative !important;
-	left: auto !important;
-	right: auto !important;
-	top: auto !important;
-	box-shadow: none !important;
-	margin: 0 !important;
-	padding: 0 !important;
-	border: none !important;
-	background: transparent !important;
+/* Simple Direct Product Items */
+.cd-minicart-items {
+	margin: 0;
+	padding: 0;
 }
 
-.cd-minicart .action.close {
-	display: none !important;
+.cd-product-item {
+	display: flex;
+	padding: 15px 0;
+	border-bottom: 1px solid #f0f0f0;
+	position: relative;
+}
+
+.cd-product-image {
+	width: 75px;
+	height: 75px;
+	flex-shrink: 0;
+}
+
+.cd-product-image img {
+	max-width: 100%;
+	height: auto;
+	border: 1px solid #f0f0f0;
+}
+
+.cd-product-details {
+	flex: 1;
+	padding-left: 15px;
+	display: flex;
+	flex-direction: column;
+}
+
+.cd-product-name {
+	margin-bottom: 5px;
+}
+
+.cd-product-name a {
+	color: #122C58;
+	font-weight: 500;
+	text-decoration: none;
+	font-size: 14px;
+}
+
+.cd-product-price {
+	color: #333;
+	font-weight: 500;
+	font-size: 14px;
+	margin-bottom: 5px;
+}
+
+.cd-product-qty {
+	color: #666;
+	font-size: 13px;
+}
+
+.cd-empty-cart {
+	padding: 15px 0;
+	text-align: center;
+	color: #666;
+}
+
+/* Mini Cart Footer Styles */
+.cd-minicart-footer {
+	padding: 15px 20px;
+	border-top: 1px solid #eee;
+	display: flex;
+	flex-direction: column;
+	position: sticky;
+	bottom: 0;
+	background: #fff;
+	box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+	z-index: 100;
+}
+
+/* Subtotal in footer */
+.cd-minicart-subtotal {
+	padding-bottom: 15px;
+	margin-bottom: 15px;
+	border-bottom: 1px solid #f0f0f0;
+	width: 100%;
+}
+
+.cd-minicart-subtotal .subtotal {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 0;
+	padding: 0;
+	font-weight: 600;
+}
+
+.cd-minicart-subtotal .subtotal .label {
+	font-size: 16px;
+	color: #122C58;
+}
+
+.cd-minicart-subtotal .subtotal .price {
+	font-size: 16px;
+	color: #122C58;
+}
+
+/* Buttons Container */
+.cd-minicart-buttons {
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+}
+
+.cd-minicart-button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 12px 15px;
+	border-radius: 4px;
+	font-weight: 400;
+	text-decoration: none;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	font-size: 14px;
+	transition: all 0.2s ease;
+	width: 48%;
+}
+
+.cd-view-cart {
+	background-color: #fff;
+	color: #122C58;
+	border: 1px solid #122C58;
+}
+
+.cd-view-cart:hover {
+	background-color: #f5f5f5;
+	color: #122C58;
+}
+
+.cd-checkout {
+	background-color: #122C58;
+	color: #fff;
+	border: 1px solid #122C58;
+}
+
+.cd-checkout:hover {
+	background-color: #0e2346;
 }
 
 /* Mini cart overlay */
@@ -350,6 +477,15 @@ body.minicart-active .cd-overlay {
 @media screen and (max-width: 767px) {
 	.cd-minicart {
 		width: 85% !important;
+	}
+	
+	.cd-minicart-button {
+		padding: 10px;
+		font-size: 13px;
+	}
+	
+	.cd-minicart-footer {
+		padding: 12px 15px;
 	}
 }
 
