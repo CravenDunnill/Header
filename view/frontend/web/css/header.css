@@ -235,7 +235,6 @@
 
 	.cd-header-desktop {
 		display: flex;
-		justify-content: space-between;
 		align-items: center;
 		padding: 20px 30px;
 		background: #fff;
@@ -247,6 +246,23 @@
 	.cd-header-left,
 	.cd-header-right {
 		display: flex;
+		flex: 1; /* Both sides get equal width */
+		align-items: center;
+	}
+	
+	.cd-header-left {
+		justify-content: flex-start; /* Align contents to the left */
+	}
+	
+	.cd-header-right {
+		justify-content: flex-end; /* Align contents to the right */
+	}
+	
+	.cd-header-center {
+		/* Fixed position in the center */
+		flex: 0 0 auto; /* Don't grow or shrink */
+		display: flex;
+		flex-direction: column;
 		align-items: center;
 	}
 

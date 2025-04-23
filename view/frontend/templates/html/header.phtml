@@ -113,7 +113,7 @@
 		<div class="cd-search-panel-inner">
 			<form class="cd-search-form" action="<?= $block->getSearchUrl() ?>" method="get">
 				<div class="cd-search-input-wrapper">
-					<input type="text" name="q" id="cd-search-input" class="cd-search-input" placeholder="Search products...">
+					<input type="text" name="q" id="cd-search-input" class="cd-search-input" placeholder="Search products..." autocomplete="off">
 					<button type="submit" class="cd-search-submit">
 						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<circle cx="11" cy="11" r="8"></circle>
@@ -150,4 +150,74 @@
 	
 	<!-- Overlay -->
 	<div class="cd-overlay" id="cd-overlay"></div>
+
+	
+	<script>
+		// Direct DOM manipulation as a fallback
+		document.addEventListener('DOMContentLoaded', function() {
+			console.log('Debug helper loaded');
+			
+			// Add direct click handlers as a backup
+			document.getElementById('cd-search-button').addEventListener('click', function(e) {
+				e.preventDefault();
+				console.log('Search button clicked via direct DOM');
+				
+				// Force display the search panel
+				document.getElementById('cd-search-panel').style.display = 'block';
+				document.getElementById('cd-overlay').style.display = 'block';
+				
+				// Apply blur to content
+				const mainContent = document.querySelector('.page-main');
+				if (mainContent) mainContent.style.filter = 'blur(4px)';
+				
+				const footer = document.querySelector('.page-footer');  
+				if (footer) footer.style.filter = 'blur(4px)';
+				
+				const navSections = document.querySelector('.nav-sections');
+				if (navSections) navSections.style.filter = 'blur(4px)';
+				
+				// Focus search input
+				setTimeout(function() {
+					document.getElementById('cd-search-input').focus();
+				}, 100);
+			});
+			
+			// Close button
+			document.getElementById('cd-search-close').addEventListener('click', function() {
+				document.getElementById('cd-search-panel').style.display = 'none';
+				document.getElementById('cd-overlay').style.display = 'none';
+				
+				// Remove blur
+				const mainContent = document.querySelector('.page-main');
+				if (mainContent) mainContent.style.filter = 'none';
+				
+				const footer = document.querySelector('.page-footer');  
+				if (footer) footer.style.filter = 'none';
+				
+				const navSections = document.querySelector('.nav-sections');
+				if (navSections) navSections.style.filter = 'none';
+			});
+			
+			// Overlay click
+			document.getElementById('cd-overlay').addEventListener('click', function() {
+				document.getElementById('cd-search-panel').style.display = 'none';
+				document.getElementById('cd-overlay').style.display = 'none';
+				
+				// Remove blur
+				const mainContent = document.querySelector('.page-main');
+				if (mainContent) mainContent.style.filter = 'none';
+				
+				const footer = document.querySelector('.page-footer');  
+				if (footer) footer.style.filter = 'none';
+				
+				const navSections = document.querySelector('.nav-sections');
+				if (navSections) navSections.style.filter = 'none';
+			});
+		});
+	</script>
+
+
+
+
 </div>
+
