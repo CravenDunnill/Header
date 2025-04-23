@@ -153,71 +153,196 @@
 
 	
 	<script>
-		// Direct DOM manipulation as a fallback
-		document.addEventListener('DOMContentLoaded', function() {
-			console.log('Debug helper loaded');
+		// IMPORTANT: This script moves the overlay to prevent it from covering the header
+		(function() {
+			// Function to reposition the overlay so it doesn't cover header
+			function fixOverlayPosition() {
+				var overlay = document.getElementById('cd-overlay');
+				var pageMain = document.querySelector('.page-main');
+				
+				if (overlay && pageMain) {
+					// Only move if not already positioned correctly
+					if (overlay.parentNode !== pageMain) {
+						// Clone the overlay to preserve event handlers
+						var newOverlay = overlay.cloneNode(true);
+						
+						// Remove the original
+						overlay.parentNode.removeChild(overlay);
+						
+						// Add the clone to page-main
+						pageMain.insertBefore(newOverlay, pageMain.firstChild);
+						
+						// Fix positioning
+						newOverlay.style.position = 'absolute';
+						newOverlay.style.top = '0';
+						newOverlay.style.left = '0';
+						newOverlay.style.right = '0';
+						newOverlay.style.bottom = '0';
+						newOverlay.style.zIndex = '100';
+						
+						// Reattach event listeners if needed
+						newOverlay.addEventListener('click', function() {
+							document.getElementById('cd-search-panel').style.display = 'none';
+							newOverlay.style.display = 'none';
+							
+							// Remove blur from all elements
+							document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
+								if (el) el.style.filter = 'none';
+							});
+						});
+					}
+				}
+				
+				// Ensure header elements have the highest z-index
+				var headerElements = [
+					'.page-header',
+					'header.page-header',
+					'.cd-header-container',
+					'.cd-header-desktop',
+					'.cd-header-mobile',
+					'.cd-header-left',
+					'.cd-header-right',
+					'.cd-header-center'
+				];
+				
+				headerElements.forEach(function(selector) {
+					document.querySelectorAll(selector).forEach(function(el) {
+						if (el) {
+							el.style.position = 'relative';
+							el.style.zIndex = '1200';
+							el.style.filter = 'none';
+							el.style.opacity = '1';
+							el.style.visibility = 'visible';
+						}
+					});
+				});
+			}
 			
-			// Add direct click handlers as a backup
-			document.getElementById('cd-search-button').addEventListener('click', function(e) {
-				e.preventDefault();
-				console.log('Search button clicked via direct DOM');
+			// Run immediately
+			fixOverlayPosition();
+			
+			// Also run when DOM is ready
+			document.addEventListener('DOMContentLoaded', function() {
+				console.log('Header overlay fix loaded');
+				fixOverlayPosition();
 				
-				// Force display the search panel
-				document.getElementById('cd-search-panel').style.display = 'block';
-				document.getElementById('cd-overlay').style.display = 'block';
+				// Enhanced close button functionality
+				var searchCloseButton = document.getElementById('cd-search-close');
+				if (searchCloseButton) {
+					// Remove any existing handlers
+					var newSearchCloseButton = searchCloseButton.cloneNode(true);
+					searchCloseButton.parentNode.replaceChild(newSearchCloseButton, searchCloseButton);
+					
+					// Add new, more direct handler
+					newSearchCloseButton.addEventListener('click', function(e) {
+						e.preventDefault();
+						e.stopPropagation();
+						console.log('Search close button clicked - enhanced inline handler');
+						
+						// Hide search panel
+						var searchPanel = document.getElementById('cd-search-panel');
+						if (searchPanel) searchPanel.style.display = 'none';
+						
+						// Find and hide overlay (handle both relocated and original positions)
+						var pageMainOverlay = document.querySelector('.page-main #cd-overlay');
+						if (pageMainOverlay) pageMainOverlay.style.display = 'none';
+						
+						var originalOverlay = document.querySelector('#cd-overlay:not(.page-main #cd-overlay)');
+						if (originalOverlay) originalOverlay.style.display = 'none';
+						
+						// Remove blur from content
+						document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
+							if (el) el.style.filter = 'none';
+						});
+						
+						return false;
+					});
+				}
 				
-				// Apply blur to content
-				const mainContent = document.querySelector('.page-main');
-				if (mainContent) mainContent.style.filter = 'blur(4px)';
+				// Run again when search button is clicked
+				document.getElementById('cd-search-button').addEventListener('click', function(e) {
+					e.preventDefault();
+					console.log('Search button clicked - fixing overlay position');
+					
+					// Ensure overlay is properly positioned
+					fixOverlayPosition();
+					
+					// Now, safely display the search panel
+					document.getElementById('cd-search-panel').style.display = 'block';
+					
+					// Get the repositioned overlay
+					var overlay = document.querySelector('.page-main #cd-overlay');
+					if (overlay) {
+						overlay.style.display = 'block';
+					}
+					
+					// Apply blur only to main content
+					document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
+						if (el) el.style.filter = 'blur(4px)';
+					});
+					
+					// Force header elements to be visible
+					document.querySelectorAll('.page-header, header.page-header, .cd-header-container').forEach(function(el) {
+						if (el) {
+							el.style.position = 'relative';
+							el.style.zIndex = '1200';
+							el.style.filter = 'none';
+							el.style.opacity = '1';
+							el.style.visibility = 'visible';
+						}
+					});
+					
+					// Focus search input
+					setTimeout(function() {
+						document.getElementById('cd-search-input').focus();
+					}, 100);
+				});
 				
-				const footer = document.querySelector('.page-footer');  
-				if (footer) footer.style.filter = 'blur(4px)';
-				
-				const navSections = document.querySelector('.nav-sections');
-				if (navSections) navSections.style.filter = 'blur(4px)';
-				
-				// Focus search input
-				setTimeout(function() {
-					document.getElementById('cd-search-input').focus();
-				}, 100);
+				// Also add handler for mobile search button
+				if (document.getElementById('cd-search-button-mobile')) {
+					document.getElementById('cd-search-button-mobile').addEventListener('click', function(e) {
+						e.preventDefault();
+						console.log('Mobile search button clicked - fixing overlay position');
+						
+						// Ensure overlay is properly positioned
+						fixOverlayPosition();
+						
+						// Now, safely display the search panel
+						document.getElementById('cd-search-panel').style.display = 'block';
+						
+						// Get the repositioned overlay
+						var overlay = document.querySelector('.page-main #cd-overlay');
+						if (overlay) {
+							overlay.style.display = 'block';
+						}
+						
+						// Apply blur only to main content
+						document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
+							if (el) el.style.filter = 'blur(4px)';
+						});
+						
+						// Force header elements to be visible
+						document.querySelectorAll('.page-header, header.page-header, .cd-header-container').forEach(function(el) {
+							if (el) {
+								el.style.position = 'relative';
+								el.style.zIndex = '1200';
+								el.style.filter = 'none';
+								el.style.opacity = '1';
+								el.style.visibility = 'visible';
+							}
+						});
+						
+						// Focus search input
+						setTimeout(function() {
+							document.getElementById('cd-search-input').focus();
+						}, 100);
+					});
+				}
 			});
 			
-			// Close button
-			document.getElementById('cd-search-close').addEventListener('click', function() {
-				document.getElementById('cd-search-panel').style.display = 'none';
-				document.getElementById('cd-overlay').style.display = 'none';
-				
-				// Remove blur
-				const mainContent = document.querySelector('.page-main');
-				if (mainContent) mainContent.style.filter = 'none';
-				
-				const footer = document.querySelector('.page-footer');  
-				if (footer) footer.style.filter = 'none';
-				
-				const navSections = document.querySelector('.nav-sections');
-				if (navSections) navSections.style.filter = 'none';
-			});
-			
-			// Overlay click
-			document.getElementById('cd-overlay').addEventListener('click', function() {
-				document.getElementById('cd-search-panel').style.display = 'none';
-				document.getElementById('cd-overlay').style.display = 'none';
-				
-				// Remove blur
-				const mainContent = document.querySelector('.page-main');
-				if (mainContent) mainContent.style.filter = 'none';
-				
-				const footer = document.querySelector('.page-footer');  
-				if (footer) footer.style.filter = 'none';
-				
-				const navSections = document.querySelector('.nav-sections');
-				if (navSections) navSections.style.filter = 'none';
-			});
-		});
+			// Also run on window load
+			window.addEventListener('load', fixOverlayPosition);
+		})();
 	</script>
 
-
-
-
 </div>
-

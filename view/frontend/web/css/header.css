@@ -17,6 +17,7 @@
 	border-radius: 50%;
 	background-color: #DB804A;
 	display: block;
+	z-index: 1201; /* Ensure it's above the cart icon */
 }
 
 /* Header icons common styles */
@@ -29,6 +30,7 @@
 	text-decoration: none;
 	color: #122C58;
 	cursor: pointer;
+	font-weight: 200;
 }
 
 /* Logo and tagline */
@@ -43,7 +45,7 @@
 	font-size: 10px;
 	color: #122C58;
 	letter-spacing: 1px;
-	font-weight: 500;
+	font-weight: 200;
 	margin-top: 2px;
 }
 
@@ -57,7 +59,7 @@
 	padding: 20px;
 	box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 	display: none;
-	z-index: 1001;
+	z-index: 1101 !important; /* Make sure it's properly layered */
 }
 
 .cd-search-panel.active {
@@ -97,6 +99,7 @@
 	border: none;
 	cursor: pointer;
 	padding: 10px;
+	font-weight: 200;
 }
 
 .cd-search-close {
@@ -105,6 +108,8 @@
 	cursor: pointer;
 	padding: 0 10px;
 	margin-left: 10px;
+	font-weight: 200;
+	z-index: 1102 !important; /* Ensure the close button is clickable */
 }
 
 /* Mini Cart */
@@ -138,6 +143,7 @@
 	margin: 0;
 	font-size: 18px;
 	color: #122C58;
+	font-weight: 200;
 }
 
 .cd-minicart-close {
@@ -145,6 +151,7 @@
 	border: none;
 	cursor: pointer;
 	padding: 5px;
+	font-weight: 200;
 }
 
 .cd-minicart-content {
@@ -161,7 +168,7 @@
 	width: 100%;
 	height: 100%;
 	background: rgba(0,0,0,0.5);
-	z-index: 999;
+	z-index: 990 !important;
 	display: none;
 }
 
@@ -192,6 +199,7 @@
 .cd-menu-button {
 	margin-right: 15px;
 	cursor: pointer;
+	font-weight: 200;
 }
 
 .cd-logo-mobile {
@@ -206,6 +214,7 @@
 	justify-content: center;
 	color: #122C58;
 	text-decoration: none;
+	font-weight: 200;
 }
 
 .cd-header-mobile-right {
@@ -220,6 +229,7 @@
 
 .cd-cart-icon-wrapper {
 	position: relative;
+	display: inline-flex;
 }
 
 /* Desktop Header */
@@ -273,6 +283,7 @@
 	.cd-header-icon span {
 		margin-top: 5px;
 		font-size: 12px;
+		font-weight: 200;
 	}
 
 	.cd-search-button {
@@ -280,15 +291,68 @@
 		flex-direction: column;
 		align-items: center;
 		cursor: pointer;
+		font-weight: 200;
 	}
 	
 	.cd-search-button span {
 		margin-top: 5px;
 		font-size: 12px;
+		font-weight: 200;
 	}
 	
 	/* Mini cart - desktop specific */
 	.cd-minicart {
 		width: 400px;
 	}
+}
+
+/* Critical CSS fixes for header visibility */
+
+/* Position the overlay BEHIND the header and search panel */
+.cd-overlay {
+	z-index: 990 !important;
+}
+
+/* Ensure header elements are positioned ABOVE the overlay */
+.page-header,
+header.page-header,
+.cd-header-container,
+.cd-header-desktop,
+.cd-header-mobile,
+.cd-header-left,
+.cd-header-right,
+.cd-header-center,
+.cd-logo,
+.cd-tagline,
+.cd-search-button,
+.cd-search-button span,
+.cd-header-icon,
+.cd-header-icon span,
+.cd-header-icon-mobile,
+.cd-search-button-mobile,
+.cd-cart-trigger,
+.cd-cart-icon-wrapper {
+	position: relative;
+	z-index: 1200 !important;
+	filter: none !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+}
+
+/* Position search panel and minicart ABOVE the overlay but BELOW the header */
+.cd-search-panel {
+	z-index: 1100 !important;
+}
+
+.cd-minicart {
+	z-index: 1100 !important;
+}
+
+/* Apply transform isolation to prevent header from inheriting parent blur effects */
+.page-header,
+.cd-header-container {
+	transform: translateZ(0);
+	will-change: transform;
+	backface-visibility: hidden;
+	isolation: isolate;
 }
