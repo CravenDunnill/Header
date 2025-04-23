@@ -131,7 +131,7 @@
 		</div>
 	</div>
 	
-	<!-- Mini Cart -->
+	<!-- Mini Cart - Simplified Structure -->
 	<div class="cd-minicart" id="cd-minicart">
 		<div class="cd-minicart-header">
 			<h3>Your Trolley</h3>
@@ -142,15 +142,22 @@
 				</svg>
 			</button>
 		</div>
-		<div class="cd-minicart-content" data-mage-init='{"Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>}'>
-			<!-- Minicart content will be dynamically loaded here -->
-			<div id="minicart-content-wrapper"></div>
+		<div class="cd-minicart-content">
+			<div id="minicart-content-wrapper" data-bind="scope: 'minicart_content'">
+				<!-- ko template: getTemplate() --><!-- /ko -->
+			</div>
+			<script type="text/x-magento-init">
+			{
+				"#minicart-content-wrapper": {
+					"Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+				}
+			}
+			</script>
 		</div>
 	</div>
 	
-	<!-- Overlay -->
+	<!-- Simple Overlay -->
 	<div class="cd-overlay" id="cd-overlay"></div>
-
 	
 	<script>
 		// IMPORTANT: This script moves the overlay to prevent it from covering the header
@@ -184,6 +191,12 @@
 						newOverlay.addEventListener('click', function() {
 							document.getElementById('cd-search-panel').style.display = 'none';
 							newOverlay.style.display = 'none';
+							
+							// Close mini cart if open
+							var minicart = document.getElementById('cd-minicart');
+							if (minicart) {
+								minicart.classList.remove('active');
+							}
 							
 							// Remove blur from all elements
 							document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
@@ -259,10 +272,10 @@
 					});
 				}
 				
-				// Run again when search button is clicked
+				// Search button click handler
 				document.getElementById('cd-search-button').addEventListener('click', function(e) {
 					e.preventDefault();
-					console.log('Search button clicked - fixing overlay position');
+					console.log('Search button clicked');
 					
 					// Ensure overlay is properly positioned
 					fixOverlayPosition();
@@ -302,7 +315,7 @@
 				if (document.getElementById('cd-search-button-mobile')) {
 					document.getElementById('cd-search-button-mobile').addEventListener('click', function(e) {
 						e.preventDefault();
-						console.log('Mobile search button clicked - fixing overlay position');
+						console.log('Mobile search button clicked');
 						
 						// Ensure overlay is properly positioned
 						fixOverlayPosition();
@@ -344,5 +357,96 @@
 			window.addEventListener('load', fixOverlayPosition);
 		})();
 	</script>
-
+	
+	<!-- Direct Mini Cart JavaScript -->
+	<script>
+	require(['jquery', 'Magento_Customer/js/customer-data'], function($, customerData) {
+		'use strict';
+		
+		$(document).ready(function() {
+			console.log('Mini Cart JS initialized');
+			
+			// Direct trigger for cart sidebar
+			$('#cd-cart-trigger, #cd-cart-trigger-mobile').on('click', function(e) {
+				e.preventDefault();
+				console.log('Cart trigger clicked');
+				
+				// Show minicart
+				$('#cd-minicart').addClass('active');
+				
+				// Show overlay
+				$('#cd-overlay').css('display', 'block');
+				
+				// Force reload cart data
+				customerData.reload(['cart'], false);
+				
+				// Apply blur effect to content
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
+			});
+			
+			// Close button
+			$('#cd-minicart-close').on('click', function(e) {
+				e.preventDefault();
+				console.log('Cart close clicked');
+				
+				// Hide minicart
+				$('#cd-minicart').removeClass('active');
+				
+				// Hide overlay
+				$('#cd-overlay').css('display', 'none');
+				
+				// Remove blur effect
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+			});
+			
+			// Overlay click
+			$('#cd-overlay').on('click', function() {
+				console.log('Overlay clicked');
+				
+				// Hide minicart
+				$('#cd-minicart').removeClass('active');
+				
+				// Hide search panel
+				$('#cd-search-panel').hide();
+				
+				// Hide overlay
+				$(this).css('display', 'none');
+				
+				// Remove blur effect
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+			});
+			
+			// Update cart counter
+			function updateCartCounter() {
+				var cartData = customerData.get('cart');
+				
+				if (cartData() && cartData().summary_count > 0) {
+					console.log('Cart has items: ' + cartData().summary_count);
+					$('.cd-cart-counter').show();
+				} else {
+					$('.cd-cart-counter').hide();
+				}
+			}
+			
+			// Initialize cart counter
+			var cartData = customerData.get('cart');
+			cartData.subscribe(function() {
+				updateCartCounter();
+			});
+			
+			// Initial update
+			updateCartCounter();
+			
+			// Escape key handler
+			$(document).keyup(function(e) {
+				if (e.key === "Escape") {
+					$('#cd-minicart').removeClass('active');
+					$('#cd-search-panel').hide();
+					$('#cd-overlay').hide();
+					$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+				}
+			});
+		});
+	});
+	</script>
 </div>

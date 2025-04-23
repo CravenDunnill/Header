@@ -1,7 +1,8 @@
 define([
 	'jquery',
+	'Magento_Customer/js/customer-data',
 	'jquery/ui'
-], function($) {
+], function($, customerData) {
 	'use strict';
 	
 	return function(config) {
@@ -125,6 +126,17 @@ define([
 			return false;
 		}
 		
+		// Initialize cart counter
+		function updateCartCounter() {
+			var cartData = customerData.get('cart');
+			
+			if (cartData() && cartData().summary_count > 0) {
+				$('.cd-cart-counter').show();
+			} else {
+				$('.cd-cart-counter').hide();
+			}
+		}
+		
 		// Apply before document ready for maximum effectiveness
 		fixOverlayPosition();
 		
@@ -133,6 +145,15 @@ define([
 		
 		$(document).ready(function() {
 			console.log('Header JS initialized with fixed toggle functionality');
+			
+			// Initialize minicart data
+			var cartData = customerData.get('cart');
+			cartData.subscribe(function (updatedCart) {
+				updateCartCounter();
+			});
+			
+			// Initial update of cart counter
+			updateCartCounter();
 			
 			// Try again after document is ready
 			fixOverlayPosition();
@@ -185,35 +206,42 @@ define([
 				return false;
 			});
 			
-			// Mini Cart Functionality
+			// Mini Cart Functionality - Updated for proper toggle
 			$('#cd-cart-trigger, #cd-cart-trigger-mobile').on('click', function(e) {
 				e.preventDefault();
+				e.stopPropagation();
 				
 				// Try the overlay fix again when opening minicart
 				fixOverlayPosition();
 				
-				$('#cd-minicart').addClass('active');
-				$('#cd-overlay').css('display', 'block');
+				// Force initialization of minicart content
+				customerData.reload(['cart'], false);
 				
-				// Apply blur, including breadcrumbs
-				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
-				
-				// Explicitly ensure header is NOT blurred using more specific selectors
-				$('.page-header, header.page-header, .cd-header-container, .cd-header-desktop, .cd-header-mobile, .cd-header-left, .cd-header-right, .cd-header-center')
-					.addClass('no-blur')
-					.css({
+				// Check if mini cart is currently visible
+				if ($('#cd-minicart').hasClass('active')) {
+					// Hide minicart
+					$('#cd-minicart').removeClass('active');
+					$('#cd-overlay').hide();
+					
+					// Remove blur from content
+					$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+				} else {
+					// Show minicart
+					$('#cd-minicart').addClass('active');
+					$('#cd-overlay').show();
+					
+					// Apply blur to content areas
+					$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
+					
+					// Ensure header is not blurred
+					$('.page-header, header.page-header, .cd-header-container').css({
 						'filter': 'none',
-						'z-index': '1200',
-						'position': 'relative',
-						'opacity': '1',
-						'visibility': 'visible'
+						'z-index': '1200'
 					});
-				
-				// Ensure header and minicart have correct z-index
-				$('.page-header, .cd-header-container').css('z-index', '1200');
-				$('#cd-minicart').css('z-index', '1100');
+				}
 			});
 			
+			// Mini Cart Close Button
 			$('#cd-minicart-close').on('click', function() {
 				$('#cd-minicart').removeClass('active');
 				$('#cd-overlay').hide();
@@ -234,15 +262,10 @@ define([
 				}
 			});
 			
-			// Update cart counter
+			// Update cart counter when cart is updated
 			$(document).on('ajax:updateCartItemQty ajax:addToCart', function() {
 				setTimeout(function() {
-					const cartItemCount = parseInt($('[data-block="minicart"]').find('.counter-number').text());
-					if (cartItemCount > 0) {
-						$('.cd-cart-counter').show();
-					} else {
-						$('.cd-cart-counter').hide();
-					}
+					updateCartCounter();
 				}, 1000);
 			});
 			

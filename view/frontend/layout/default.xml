@@ -12,21 +12,43 @@
 				<arguments>
 					<argument name="jsLayout" xsi:type="array">
 						<item name="components" xsi:type="array">
-							<item name="miniCart" xsi:type="array">
+							<item name="minicart_content" xsi:type="array">
 								<item name="component" xsi:type="string">Magento_Checkout/js/view/minicart</item>
 								<item name="config" xsi:type="array">
 									<item name="template" xsi:type="string">Magento_Checkout/minicart/content</item>
+								</item>
+								<item name="children" xsi:type="array">
+									<item name="subtotal.container" xsi:type="array">
+										<item name="component" xsi:type="string">Magento_Checkout/js/view/checkout/minicart/subtotal/totals</item>
+										<item name="provider" xsi:type="string">totalsData</item>
+									</item>
+									<item name="extra_info" xsi:type="array">
+										<item name="component" xsi:type="string">Magento_Checkout/js/view/checkout/minicart/extra-info</item>
+									</item>
+									<item name="promotion" xsi:type="array">
+										<item name="component" xsi:type="string">Magento_Checkout/js/view/checkout/minicart/promotion</item>
+									</item>
+									<item name="item.renderer" xsi:type="array">
+										<item name="component" xsi:type="string">Magento_Checkout/js/view/checkout/minicart/item/default</item>
+										<item name="config" xsi:type="array">
+											<item name="template" xsi:type="string">Magento_Checkout/minicart/item/default</item>
+										</item>
+										<item name="children" xsi:type="array">
+											<item name="item.image" xsi:type="array">
+												<item name="component" xsi:type="string">Magento_Catalog/js/view/image</item>
+												<item name="config" xsi:type="array">
+													<item name="template" xsi:type="string">Magento_Catalog/product/image</item>
+													<item name="displayArea" xsi:type="string">itemImage</item>
+												</item>
+											</item>
+										</item>
+									</item>
 								</item>
 							</item>
 						</item>
 					</argument>
 				</arguments>
 			</block>
-		</referenceContainer>
-		
-		<!-- Add JS for handling search and minicart functionality -->
-		<referenceContainer name="after.body.start">
-			<block class="Magento\Framework\View\Element\Template" name="custom.header.js" template="CravenDunnill_Header::html/header_js.phtml"/>
 		</referenceContainer>
 	</body>
 </page>
