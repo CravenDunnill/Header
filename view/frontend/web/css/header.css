@@ -356,3 +356,46 @@ header.page-header,
 	backface-visibility: hidden;
 	isolation: isolate;
 }
+
+/* Hover effects for icons and text */
+
+/* Transition for quick hover effects */
+.cd-search-button svg, .cd-search-button span,
+.cd-header-icon svg, .cd-header-icon span,
+.cd-cart-trigger svg, .cd-cart-trigger span,
+.cd-tagline,
+.cd-search-button-mobile svg,
+.cd-header-icon-mobile svg {
+	transition: all 0.15s ease;
+}
+
+/* Desktop hover effects */
+.cd-search-button:hover svg,
+.cd-header-icon:hover svg,
+.cd-cart-trigger:hover svg {
+	stroke: #DB804A !important;
+}
+
+.cd-search-button:hover span,
+.cd-header-icon:hover span,
+.cd-cart-trigger:hover span {
+	color: #DB804A !important;
+}
+
+.cd-logo:hover .cd-tagline {
+	color: #DB804A !important;
+}
+
+/* Mobile hover effects */
+.cd-search-button-mobile:hover svg,
+.cd-header-icon-mobile:hover svg,
+.cd-cart-trigger-mobile:hover svg {
+	stroke: #DB804A !important;
+}
+
+/* For the logo SVG, we'll use a filter to give a color effect since we can't 
+   directly change the colors of an external SVG loaded as an image */
+.cd-logo:hover img,
+.cd-logo-mobile:hover img {
+	filter: brightness(0.95) sepia(0.2) saturate(2) hue-rotate(-5deg);
+}

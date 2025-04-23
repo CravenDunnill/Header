@@ -8,21 +8,22 @@ define([
 		// Critical fix: Move the overlay to a position that won't cover the header
 		function fixOverlayPosition() {
 			// Move overlay to be a child of page-main instead of being at the top level
-			// This ensures it only covers the content, not the header
 			const $overlay = $('#cd-overlay');
 			const $pageMain = $('.page-main');
 			
 			if ($overlay.length && $pageMain.length) {
-				// Only move it if it's not already a child of page-main
+				// Only move if not already positioned correctly
 				if (!$overlay.parent().is($pageMain)) {
-					// Clone the overlay to preserve all event handlers
+					// Clone the overlay to preserve event handlers
 					const $newOverlay = $overlay.clone(true);
+					
 					// Remove the original
 					$overlay.remove();
-					// Append the clone to page-main
+					
+					// Add the clone to page-main
 					$pageMain.prepend($newOverlay);
 					
-					// Fix the styling to make it cover only the page-main content
+					// Fix positioning
 					$newOverlay.css({
 						'position': 'absolute',
 						'top': '0',
@@ -35,15 +36,103 @@ define([
 			}
 		}
 		
+		// Function to close search panel - declared globally to be reused
+		function closeSearchPanel(e) {
+			if (e) {
+				e.preventDefault();
+				e.stopPropagation();
+			}
+			
+			console.log('Closing search panel');
+			
+			// Use both direct DOM and jQuery for maximum compatibility
+			$('#cd-search-panel').hide();
+			if (document.getElementById('cd-search-panel')) {
+				document.getElementById('cd-search-panel').style.display = 'none';
+			}
+			
+			$('#cd-overlay').hide();
+			if (document.getElementById('cd-overlay')) {
+				document.getElementById('cd-overlay').style.display = 'none';
+			}
+			
+			// Remove blur from all elements
+			$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+			
+			return false;
+		}
+		
+		// Function to show search panel
+		function showSearchPanel() {
+			// Try the overlay fix again when opening search
+			fixOverlayPosition();
+			
+			// Explicitly show the search panel
+			$('#cd-search-panel').show();
+			if (document.getElementById('cd-search-panel')) {
+				document.getElementById('cd-search-panel').style.display = 'block';
+			}
+			
+			// Only show overlay inside page-main
+			$('#cd-overlay').show();
+			if (document.getElementById('cd-overlay')) {
+				document.getElementById('cd-overlay').style.display = 'block';
+			}
+			
+			// Apply blur to content areas only
+			$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
+			
+			// Explicitly ensure header is NOT blurred using more specific selectors
+			$('.page-header, header.page-header, .cd-header-container, .cd-header-desktop, .cd-header-mobile, .cd-header-left, .cd-header-right, .cd-header-center')
+				.addClass('no-blur')
+				.css({
+					'filter': 'none',
+					'z-index': '1200',
+					'position': 'relative',
+					'opacity': '1',
+					'visibility': 'visible'
+				});
+			
+			// Ensure header and search panel have correct z-index
+			$('.page-header, .cd-header-container').css('z-index', '1200');
+			$('.cd-search-panel').css('z-index', '1100');
+			
+			// Focus on search input with slight delay to ensure it's visible
+			setTimeout(function() {
+				$('#cd-search-input').focus();
+			}, 100);
+		}
+		
+		// Function to toggle search panel visibility
+		function toggleSearchPanel(e) {
+			if (e) {
+				e.preventDefault();
+				e.stopPropagation();
+			}
+			
+			console.log('Toggle search panel');
+			
+			// Check if search panel is currently visible
+			var searchPanel = document.getElementById('cd-search-panel');
+			var isVisible = searchPanel && (searchPanel.style.display === 'block' || $(searchPanel).is(':visible'));
+			
+			if (isVisible) {
+				closeSearchPanel();
+			} else {
+				showSearchPanel();
+			}
+			
+			return false;
+		}
+		
 		// Apply before document ready for maximum effectiveness
 		fixOverlayPosition();
 		
 		// Execute immediately - don't wait for document ready
-		// Apply no-blur class to header elements
 		$('.page-header, header.page-header, .cd-header-container, .cd-header-desktop, .cd-header-mobile').addClass('no-blur');
 		
 		$(document).ready(function() {
-			console.log('Header JS initialized with overlay fix');
+			console.log('Header JS initialized with fixed toggle functionality');
 			
 			// Try again after document is ready
 			fixOverlayPosition();
@@ -60,69 +149,40 @@ define([
 				'visibility': 'visible'
 			});
 			
-			// Enhanced close functionality for search panel
-			$('#cd-search-close').off('click').on('click', function(e) {
-				console.log('Search close clicked - enhanced handler');
+			// Unbind any existing handlers first to prevent duplicates
+			$('#cd-search-button, #cd-search-button-mobile').off('click');
+			$('#cd-search-close').off('click');
+			$('#cd-overlay').off('click');
+			
+			// Bind search toggle functionality
+			$('#cd-search-button, #cd-search-button-mobile').on('click', function(e) {
+				return toggleSearchPanel(e);
+			});
+			
+			// Bind search close functionality
+			$('#cd-search-close').on('click', function(e) {
+				return closeSearchPanel(e);
+			});
+			
+			// Close everything when clicking overlay
+			$('#cd-overlay').on('click', function(e) {
+				console.log('Overlay clicked');
+				
+				// Close search panel
+				$('#cd-search-panel').hide();
+				
+				// Close minicart
+				$('#cd-minicart').removeClass('active');
+				
+				// Hide overlay
+				$('#cd-overlay').hide();
+				
+				// Remove blur from all elements
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+				
 				e.preventDefault();
 				e.stopPropagation();
-				
-				// Hide search panel
-				$('#cd-search-panel').css('display', 'none');
-				$('#cd-overlay').css('display', 'none');
-				
-				// Remove blur from all elements
-				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
-				
-				return false; // Ensure the event doesn't propagate
-			});
-			
-			// Search Panel Functionality
-			$('#cd-search-button, #cd-search-button-mobile').on('click', function(e) {
-				e.preventDefault();
-				console.log('Search button clicked');
-				
-				// Try the overlay fix again when opening search
-				fixOverlayPosition();
-				
-				// Explicitly show the search panel
-				$('#cd-search-panel').css('display', 'block');
-				
-				// Only show overlay inside page-main
-				$('#cd-overlay').css('display', 'block');
-				
-				// Apply blur to content areas only
-				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
-				
-				// Explicitly ensure header is NOT blurred using more specific selectors
-				$('.page-header, header.page-header, .cd-header-container, .cd-header-desktop, .cd-header-mobile, .cd-header-left, .cd-header-right, .cd-header-center')
-					.addClass('no-blur')
-					.css({
-						'filter': 'none',
-						'z-index': '1200',
-						'position': 'relative',
-						'opacity': '1',
-						'visibility': 'visible'
-					});
-				
-				// Ensure header and search panel have correct z-index
-				$('.page-header, .cd-header-container').css('z-index', '1200');
-				$('.cd-search-panel').css('z-index', '1100');
-				
-				// Focus on search input with slight delay to ensure it's visible
-				setTimeout(function() {
-					$('#cd-search-input').focus();
-				}, 100);
-			});
-			
-			$('#cd-search-close').on('click', function() {
-				console.log('Search close clicked');
-				
-				// Hide search panel and overlay
-				$('#cd-search-panel').css('display', 'none');
-				$('#cd-overlay').css('display', 'none');
-				
-				// Remove blur from all elements
-				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+				return false;
 			});
 			
 			// Mini Cart Functionality
@@ -156,19 +216,7 @@ define([
 			
 			$('#cd-minicart-close').on('click', function() {
 				$('#cd-minicart').removeClass('active');
-				$('#cd-overlay').css('display', 'none');
-				
-				// Remove blur from all elements
-				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
-			});
-			
-			// Close everything when clicking overlay
-			$('#cd-overlay').on('click', function() {
-				console.log('Overlay clicked');
-				
-				$('#cd-search-panel').css('display', 'none');
-				$('#cd-minicart').removeClass('active');
-				$('#cd-overlay').css('display', 'none');
+				$('#cd-overlay').hide();
 				
 				// Remove blur from all elements
 				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
@@ -177,9 +225,9 @@ define([
 			// Handle escape key
 			$(document).keyup(function(e) {
 				if (e.key === "Escape") {
-					$('#cd-search-panel').css('display', 'none');
+					$('#cd-search-panel').hide();
 					$('#cd-minicart').removeClass('active');
-					$('#cd-overlay').css('display', 'none');
+					$('#cd-overlay').hide();
 					
 					// Remove blur from all elements
 					$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
@@ -220,26 +268,37 @@ define([
 					'visibility': 'visible'
 				});
 				
-				// Direct manipulation of search close button for maximum compatibility
-				document.getElementById('cd-search-close').onclick = function(e) {
-					console.log('Search close clicked - direct handler');
-					e.preventDefault();
-					e.stopPropagation();
-					
-					// Hide search panel using direct DOM manipulation
-					document.getElementById('cd-search-panel').style.display = 'none';
-					
-					// Find the overlay whether it's been moved or not
-					var overlay = document.querySelector('#cd-overlay');
-					if (overlay) overlay.style.display = 'none';
-					
-					// Remove blur using direct DOM manipulation
-					document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
-						if (el) el.style.filter = 'none';
-					});
-					
-					return false;
-				};
+				// Direct DOM manipulation for search functionality for maximum compatibility
+				if (document.getElementById('cd-search-close')) {
+					document.getElementById('cd-search-close').onclick = closeSearchPanel;
+				}
+				
+				if (document.getElementById('cd-search-button')) {
+					document.getElementById('cd-search-button').onclick = toggleSearchPanel;
+				}
+				
+				if (document.getElementById('cd-search-button-mobile')) {
+					document.getElementById('cd-search-button-mobile').onclick = toggleSearchPanel;
+				}
+				
+				if (document.getElementById('cd-overlay')) {
+					document.getElementById('cd-overlay').onclick = function(e) {
+						console.log('Overlay clicked (direct DOM)');
+						closeSearchPanel(e);
+						
+						// Also close minicart
+						var minicart = document.getElementById('cd-minicart');
+						if (minicart) {
+							minicart.classList.remove('active');
+						}
+						
+						if (e) {
+							e.preventDefault();
+							e.stopPropagation();
+						}
+						return false;
+					};
+				}
 			});
 		});
 	};
