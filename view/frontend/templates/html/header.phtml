@@ -2,6 +2,50 @@
 /**
  * @var $block \CravenDunnill\Header\Block\Html\Header
  */
+
+/**
+ * Helper function to get product image with fallback mechanism
+ * 
+ * @param \Magento\Catalog\Model\Product $product
+ * @param \Magento\Catalog\Helper\Image $imageHelper
+ * @param string $imageType
+ * @param int $width
+ * @param int $height
+ * @return string
+ */
+function getProductImageWithFallback($product, $imageHelper, $imageType = 'product_page_image_small', $width = 75, $height = 93.75) {
+	try {
+		// Try loading the thumbnail first
+		if ($product->getThumbnail() && $product->getThumbnail() != 'no_selection') {
+			return $imageHelper->init($product, $imageType)
+				->setImageFile($product->getThumbnail())
+				->resize($width, $height)
+				->getUrl();
+		}
+		
+		// If thumbnail is not available, try the small_image
+		if ($product->getSmallImage() && $product->getSmallImage() != 'no_selection') {
+			return $imageHelper->init($product, $imageType)
+				->setImageFile($product->getSmallImage())
+				->resize($width, $height)
+				->getUrl();
+		}
+		
+		// If small_image is not available, try the base image
+		if ($product->getImage() && $product->getImage() != 'no_selection') {
+			return $imageHelper->init($product, $imageType)
+				->setImageFile($product->getImage())
+				->resize($width, $height)
+				->getUrl();
+		}
+		
+		// If no product images are available, return placeholder
+		return $imageHelper->getDefaultPlaceholderUrl('thumbnail');
+	} catch (\Exception $e) {
+		// Return placeholder on any error
+		return $imageHelper->getDefaultPlaceholderUrl('thumbnail');
+	}
+}
 ?>
 <div class="cd-header-container">
 	<!-- Desktop Header -->
@@ -159,12 +203,11 @@
 						// Get product
 						$product = $objectManager->create('Magento\Catalog\Model\Product')->load($item->getProduct()->getId());
 						
-						// Get product image
+						// Get product image helper
 						$imageHelper = $objectManager->get('\Magento\Catalog\Helper\Image');
-						$imageUrl = $imageHelper->init($product, 'product_page_image_small')
-										->setImageFile($product->getImage())
-										->resize(75, 93.75) // Updated to match 4:5 ratio
-										->getUrl();
+						
+						// Get product image with fallback
+						$imageUrl = getProductImageWithFallback($product, $imageHelper);
 						
 						// Get product URL
 						$productUrl = $product->getProductUrl();
