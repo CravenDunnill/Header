@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
 	<body>
-		<!-- Remove default header -->
+		<!-- First remove the default header wrapper -->
 		<referenceContainer name="header.container">
 			<referenceBlock name="header-wrapper" remove="true"/>
 		</referenceContainer>
 		
-		<!-- Add custom header -->
+		<!-- Wait for everything to be moved, then add our custom header at the end of header.container -->
 		<referenceContainer name="header.container">
-			<block class="CravenDunnill\Header\Block\Html\Header" name="custom.header" template="CravenDunnill_Header::html/header.phtml">
+			<block class="CravenDunnill\Header\Block\Html\Header" name="custom.header" template="CravenDunnill_Header::html/header.phtml" after="-">
 				<arguments>
 					<argument name="jsLayout" xsi:type="array">
 						<item name="components" xsi:type="array">

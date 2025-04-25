@@ -163,7 +163,7 @@
 						$imageHelper = $objectManager->get('\Magento\Catalog\Helper\Image');
 						$imageUrl = $imageHelper->init($product, 'product_page_image_small')
 										->setImageFile($product->getImage())
-										->resize(75, 75)
+										->resize(75, 93.75) // Updated to match 4:5 ratio
 										->getUrl();
 						
 						// Get product URL
@@ -177,7 +177,7 @@
 						<div class="cd-product-item">
 							<div class="cd-product-image">
 								<a href="<?php echo $productUrl; ?>">
-									<img src="<?php echo $imageUrl; ?>" alt="<?php echo $item->getName(); ?>" width="75" height="75">
+									<img src="<?php echo $imageUrl; ?>" alt="<?php echo $item->getName(); ?>">
 								</a>
 							</div>
 							<div class="cd-product-details">

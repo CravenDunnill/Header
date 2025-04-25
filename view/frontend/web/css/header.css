@@ -131,7 +131,7 @@ html, body {
 	right: -450px !important; /* Position off-screen */
 	width: 400px !important;
 	max-width: 90% !important;
-	height: 100vh !important;
+	height: 100dvh !important; /* Using dynamic viewport height for better mobile handling */
 	background: #fff !important;
 	box-shadow: -5px 0 15px rgba(0,0,0,0.1) !important;
 	transition: right 0.3s ease, visibility 0.3s ease, opacity 0.3s ease !important; /* Transition all properties */
@@ -183,7 +183,7 @@ html, body {
 	overflow-y: auto;
 	padding: 20px;
 	min-height: 100px;
-	max-height: calc(100vh - 195px); /* Adjusted to accommodate the larger footer */
+	max-height: calc(100dvh - 195px); /* Adjusted to accommodate the larger footer, also using dvh */
 	overflow-y: auto;
 }
 
@@ -200,15 +200,20 @@ html, body {
 	position: relative;
 }
 
+/* Updated for 4:5 ratio */
 .cd-product-image {
 	width: 75px;
-	height: 75px;
+	height: 93.75px; /* 75px × (5/4) = 93.75px for 4:5 ratio */
 	flex-shrink: 0;
+	overflow: hidden;
+	position: relative;
 }
 
 .cd-product-image img {
-	max-width: 100%;
-	height: auto;
+	width: 100%;
+	height: 100%;
+	object-fit: cover; /* This ensures the image covers the container without distortion */
+	object-position: center;
 	border: 1px solid #f0f0f0;
 }
 
@@ -476,7 +481,9 @@ body.minicart-active .cd-overlay {
 /* Mobile adjustments for minicart */
 @media screen and (max-width: 767px) {
 	.cd-minicart {
-		width: 85% !important;
+		width: 100% !important; /* Full width on mobile */
+		max-width: 100% !important; /* Ensure no max-width restriction */
+		right: -100% !important; /* Position off-screen by full width */
 	}
 	
 	.cd-minicart-button {
