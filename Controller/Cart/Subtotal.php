@@ -57,6 +57,9 @@ class Subtotal extends Action
 		$result = $this->resultRawFactory->create();
 		$result->setHeader('Content-Type', 'text/html');
 		
+		// Force cart reload to get most current data
+		$this->cart->getQuote()->collectTotals();
+		
 		$html = $this->getSubtotalHtml();
 		$result->setContents($html);
 		
@@ -72,6 +75,17 @@ class Subtotal extends Action
 	{
 		// Get cart subtotal
 		$quote = $this->cart->getQuote();
+		
+		// Check if cart is empty first
+		$hasItems = false;
+		foreach ($quote->getAllVisibleItems() as $item) {
+			if ($item->getQty() > 0) {
+				$hasItems = true;
+				break;
+			}
+		}
+		
+		// Get subtotal amount (will be 0 if cart is empty)
 		$subtotal = $quote->getSubtotal();
 		
 		// Format subtotal properly

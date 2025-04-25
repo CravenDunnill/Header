@@ -46,8 +46,12 @@
 						<circle cx="20" cy="21" r="1"></circle>
 						<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
 					</svg>
-					<?php if ($block->getCartItemCount() > 0): ?>
-						<span class="cd-cart-counter"></span>
+					<?php 
+					// More strict check for cart items
+					$itemCount = (int) $block->getCartItemCount();
+					if ($itemCount > 0): 
+					?>
+						<span class="cd-cart-counter"><?= $itemCount ?></span>
 					<?php endif; ?>
 				</div>
 				<span>Trolley</span>
@@ -100,8 +104,8 @@
 						<circle cx="20" cy="21" r="1"></circle>
 						<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
 					</svg>
-					<?php if ($block->getCartItemCount() > 0): ?>
-						<span class="cd-cart-counter"></span>
+					<?php if ($itemCount > 0): ?>
+						<span class="cd-cart-counter"><?= $itemCount ?></span>
 					<?php endif; ?>
 				</div>
 			</div>
@@ -144,89 +148,98 @@
 		</div>
 		<div class="cd-minicart-content">
 			<!-- Start: Simple direct cart items rendering - no Knockout -->
-			<div class="cd-minicart-items">
+			<div class="cd-minicart-items" id="cd-minicart-items">
 				<?php
 				// Get cart items directly
 				$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 				$cart = $objectManager->get('\Magento\Checkout\Model\Cart');
-				$items = $cart->getQuote()->getAllVisibleItems();
+				$quote = $cart->getQuote();
+				
+				// Get all visible items and count them precisely
+				$items = $quote->getAllVisibleItems();
+				$itemCount = count($items);
 				
 				// Get price helper for currency formatting
 				$priceHelper = $objectManager->get(\Magento\Framework\Pricing\Helper\Data::class);
 				
-				if (count($items) > 0) {
+				if ($itemCount > 0) {
 					foreach($items as $item) {
-						// Get product - using the product repository for more reliable data
-						$productRepository = $objectManager->get('\Magento\Catalog\Api\ProductRepositoryInterface');
-						$product = $productRepository->getById($item->getProduct()->getId());
-						
-						// Get media URL for constructing direct image paths
-						$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
-						$mediaUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
-						
-						// Get image helper for placeholders
-						$imageHelper = $objectManager->get('\Magento\Catalog\Helper\Image');
-						
-						// Try to get the product image using a direct approach
-						try {
-							// Check for thumbnail first
-							$thumbnail = $product->getThumbnail();
-							$smallImage = $product->getSmallImage();
-							$baseImage = $product->getImage();
-							
-							// Uncomment for debugging
-							// echo "<!-- Debug: Thumbnail: {$thumbnail}, Small: {$smallImage}, Base: {$baseImage} -->";
-							
-							if ($thumbnail && $thumbnail != 'no_selection') {
-								// Direct path to thumbnail
-								$imageUrl = $mediaUrl . 'catalog/product' . $thumbnail;
-							} 
-							elseif ($smallImage && $smallImage != 'no_selection') {
-								// Fall back to small image
-								$imageUrl = $mediaUrl . 'catalog/product' . $smallImage;
-							}
-							elseif ($baseImage && $baseImage != 'no_selection') {
-								// Fall back to base image 
-								$imageUrl = $mediaUrl . 'catalog/product' . $baseImage;
-							}
-							else {
-								// No image available, use placeholder
-								$imageUrl = $imageHelper->getDefaultPlaceholderUrl('thumbnail');
-							}
-						} catch (\Exception $e) {
-							// Error occurred, use placeholder
-							$imageUrl = $imageHelper->getDefaultPlaceholderUrl('thumbnail');
-							// Uncomment for debugging
-							// echo "<!-- Image loading error: " . $e->getMessage() . " -->";
+						// Only process items with qty > 0
+						if ($item->getQty() <= 0) {
+							continue;
 						}
 						
-						// Get product URL
-						$productUrl = $product->getProductUrl();
-						
-						// Format price properly
-						$price = $priceHelper->currency($item->getPrice(), true, false);
-						
-						// Output item HTML
-						?>
-						<div class="cd-product-item">
-							<div class="cd-product-image">
-								<a href="<?php echo $productUrl; ?>">
-									<img src="<?php echo $imageUrl; ?>" alt="<?php echo $item->getName(); ?>">
-								</a>
+						// Get product - using the product repository for more reliable data
+						$productRepository = $objectManager->get('\Magento\Catalog\Api\ProductRepositoryInterface');
+						try {
+							$product = $productRepository->getById($item->getProduct()->getId());
+							
+							// Get media URL for constructing direct image paths
+							$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+							$mediaUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+							
+							// Get image helper for placeholders
+							$imageHelper = $objectManager->get('\Magento\Catalog\Helper\Image');
+							
+							// Try to get the product image using a direct approach
+							try {
+								// Check for thumbnail first
+								$thumbnail = $product->getThumbnail();
+								$smallImage = $product->getSmallImage();
+								$baseImage = $product->getImage();
+								
+								if ($thumbnail && $thumbnail != 'no_selection') {
+									// Direct path to thumbnail
+									$imageUrl = $mediaUrl . 'catalog/product' . $thumbnail;
+								} 
+								elseif ($smallImage && $smallImage != 'no_selection') {
+									// Fall back to small image
+									$imageUrl = $mediaUrl . 'catalog/product' . $smallImage;
+								}
+								elseif ($baseImage && $baseImage != 'no_selection') {
+									// Fall back to base image 
+									$imageUrl = $mediaUrl . 'catalog/product' . $baseImage;
+								}
+								else {
+									// No image available, use placeholder
+									$imageUrl = $imageHelper->getDefaultPlaceholderUrl('thumbnail');
+								}
+							} catch (\Exception $e) {
+								// Error occurred, use placeholder
+								$imageUrl = $imageHelper->getDefaultPlaceholderUrl('thumbnail');
+							}
+							
+							// Get product URL
+							$productUrl = $product->getProductUrl();
+							
+							// Format price properly
+							$price = $priceHelper->currency($item->getPrice(), true, false);
+							
+							// Output item HTML
+							?>
+							<div class="cd-product-item">
+								<div class="cd-product-image">
+									<a href="<?php echo $productUrl; ?>">
+										<img src="<?php echo $imageUrl; ?>" alt="<?php echo $item->getName(); ?>">
+									</a>
+								</div>
+								<div class="cd-product-details">
+									<div class="cd-product-name">
+										<a href="<?php echo $productUrl; ?>"><?php echo $item->getName(); ?></a>
+									</div>
+									<div class="cd-product-price">
+										<?php echo $price; ?>
+									</div>
+									<div class="cd-product-qty">
+										Qty: <?php echo (int)$item->getQty(); ?>
+									</div>
+								</div>
 							</div>
-							<div class="cd-product-details">
-								<div class="cd-product-name">
-									<a href="<?php echo $productUrl; ?>"><?php echo $item->getName(); ?></a>
-								</div>
-								<div class="cd-product-price">
-									<?php echo $price; ?>
-								</div>
-								<div class="cd-product-qty">
-									Qty: <?php echo (int)$item->getQty(); ?>
-								</div>
-							</div>
-						</div>
-						<?php
+							<?php
+						} catch (\Exception $e) {
+							// Skip this item if it has errors
+							continue;
+						}
 					}
 				} else {
 					?>
@@ -246,7 +259,6 @@
 			<div class="cd-minicart-subtotal" id="cd-minicart-subtotal">
 				<?php 
 				// Get cart totals directly
-				$quote = $cart->getQuote();
 				$subtotal = $quote->getSubtotal();
 				
 				// Format subtotal properly using price helper

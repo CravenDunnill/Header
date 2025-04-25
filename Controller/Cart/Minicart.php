@@ -66,6 +66,9 @@ class Minicart extends Action
 		$result = $this->resultRawFactory->create();
 		$result->setHeader('Content-Type', 'text/html');
 		
+		// Force cart reload to get most current data
+		$this->cart->getQuote()->collectTotals();
+		
 		$html = $this->getMinicartHtml();
 		$result->setContents($html);
 		
@@ -79,74 +82,101 @@ class Minicart extends Action
 	 */
 	protected function getMinicartHtml()
 	{
-		$items = $this->cart->getQuote()->getAllVisibleItems();
+		// Get fresh quote and items
+		$quote = $this->cart->getQuote();
+		$items = $quote->getAllVisibleItems();
+		$itemCount = count($items);
+		
 		$html = '';
 		
-		if (count($items) > 0) {
+		// More strict check for items
+		if ($itemCount > 0) {
+			$hasValidItems = false;
+			
 			foreach ($items as $item) {
+				// Skip items with zero quantity
+				if ($item->getQty() <= 0) {
+					continue;
+				}
+				
+				$hasValidItems = true;
+				
 				// Get product
 				$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 				$productRepository = $objectManager->get('\Magento\Catalog\Api\ProductRepositoryInterface');
-				$product = $productRepository->getById($item->getProduct()->getId());
 				
-				// Get media URL for constructing direct image paths
-				$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
-				$mediaUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
-				
-				// Get image helper for placeholders
-				$imageHelper = $objectManager->get('\Magento\Catalog\Helper\Image');
-				
-				// Try to get the product image using a direct approach
 				try {
-					$thumbnail = $product->getThumbnail();
-					$smallImage = $product->getSmallImage();
-					$baseImage = $product->getImage();
+					$product = $productRepository->getById($item->getProduct()->getId());
 					
-					if ($thumbnail && $thumbnail != 'no_selection') {
-						// Direct path to thumbnail
-						$imageUrl = $mediaUrl . 'catalog/product' . $thumbnail;
-					} 
-					elseif ($smallImage && $smallImage != 'no_selection') {
-						// Fall back to small image
-						$imageUrl = $mediaUrl . 'catalog/product' . $smallImage;
-					}
-					elseif ($baseImage && $baseImage != 'no_selection') {
-						// Fall back to base image 
-						$imageUrl = $mediaUrl . 'catalog/product' . $baseImage;
-					}
-					else {
-						// No image available, use placeholder
+					// Get media URL for constructing direct image paths
+					$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+					$mediaUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+					
+					// Get image helper for placeholders
+					$imageHelper = $objectManager->get('\Magento\Catalog\Helper\Image');
+					
+					// Try to get the product image using a direct approach
+					try {
+						$thumbnail = $product->getThumbnail();
+						$smallImage = $product->getSmallImage();
+						$baseImage = $product->getImage();
+						
+						if ($thumbnail && $thumbnail != 'no_selection') {
+							// Direct path to thumbnail
+							$imageUrl = $mediaUrl . 'catalog/product' . $thumbnail;
+						} 
+						elseif ($smallImage && $smallImage != 'no_selection') {
+							// Fall back to small image
+							$imageUrl = $mediaUrl . 'catalog/product' . $smallImage;
+						}
+						elseif ($baseImage && $baseImage != 'no_selection') {
+							// Fall back to base image 
+							$imageUrl = $mediaUrl . 'catalog/product' . $baseImage;
+						}
+						else {
+							// No image available, use placeholder
+							$imageUrl = $imageHelper->getDefaultPlaceholderUrl('thumbnail');
+						}
+					} catch (\Exception $e) {
+						// Error occurred, use placeholder
 						$imageUrl = $imageHelper->getDefaultPlaceholderUrl('thumbnail');
 					}
+					
+					// Get product URL
+					$productUrl = $product->getProductUrl();
+					
+					// Format price properly
+					$price = $this->pricingHelper->currency($item->getPrice(), true, false);
+					
+					// Build the item HTML
+					$html .= '<div class="cd-product-item">';
+					$html .= '<div class="cd-product-image">';
+					$html .= '<a href="' . $productUrl . '">';
+					$html .= '<img src="' . $imageUrl . '" alt="' . $item->getName() . '">';
+					$html .= '</a>';
+					$html .= '</div>';
+					$html .= '<div class="cd-product-details">';
+					$html .= '<div class="cd-product-name">';
+					$html .= '<a href="' . $productUrl . '">' . $item->getName() . '</a>';
+					$html .= '</div>';
+					$html .= '<div class="cd-product-price">';
+					$html .= $price;
+					$html .= '</div>';
+					$html .= '<div class="cd-product-qty">';
+					$html .= 'Qty: ' . (int)$item->getQty();
+					$html .= '</div>';
+					$html .= '</div>';
+					$html .= '</div>';
 				} catch (\Exception $e) {
-					// Error occurred, use placeholder
-					$imageUrl = $imageHelper->getDefaultPlaceholderUrl('thumbnail');
+					// If there's any error with this item, skip it
+					continue;
 				}
-				
-				// Get product URL
-				$productUrl = $product->getProductUrl();
-				
-				// Format price properly
-				$price = $this->pricingHelper->currency($item->getPrice(), true, false);
-				
-				// Build the item HTML
-				$html .= '<div class="cd-product-item">';
-				$html .= '<div class="cd-product-image">';
-				$html .= '<a href="' . $productUrl . '">';
-				$html .= '<img src="' . $imageUrl . '" alt="' . $item->getName() . '">';
-				$html .= '</a>';
-				$html .= '</div>';
-				$html .= '<div class="cd-product-details">';
-				$html .= '<div class="cd-product-name">';
-				$html .= '<a href="' . $productUrl . '">' . $item->getName() . '</a>';
-				$html .= '</div>';
-				$html .= '<div class="cd-product-price">';
-				$html .= $price;
-				$html .= '</div>';
-				$html .= '<div class="cd-product-qty">';
-				$html .= 'Qty: ' . (int)$item->getQty();
-				$html .= '</div>';
-				$html .= '</div>';
+			}
+			
+			// If we processed all items but found none valid, show empty cart
+			if (!$hasValidItems) {
+				$html = '<div class="cd-empty-cart">';
+				$html .= '<p>You have no items in your trolley.</p>';
 				$html .= '</div>';
 			}
 		} else {

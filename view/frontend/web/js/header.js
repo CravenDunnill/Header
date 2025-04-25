@@ -383,22 +383,33 @@ define([
 		function updateCartCounter() {
 			var cartData = customerData.get('cart');
 			
-			if (cartData() && cartData().summary_count > 0) {
-				$('.cd-cart-counter').text(cartData().summary_count).show();
-				// Add animation class
-				$('.cd-cart-counter').addClass('updated');
-				// Remove class after animation completes
-				setTimeout(function() {
-					$('.cd-cart-counter').removeClass('updated');
-				}, 500);
+			// Make sure we have valid cart data and a summary count
+			if (cartData() && typeof cartData().summary_count !== 'undefined') {
+				// Convert to integer to be sure
+				var summaryCount = parseInt(cartData().summary_count, 10);
+				
+				if (summaryCount > 0) {
+					// Show counter with animation
+					$('.cd-cart-counter').text(summaryCount).show();
+					// Add animation class
+					$('.cd-cart-counter').addClass('updated');
+					// Remove class after animation completes
+					setTimeout(function() {
+						$('.cd-cart-counter').removeClass('updated');
+					}, 500);
+				} else {
+					// Hide counter when count is 0
+					$('.cd-cart-counter').hide();
+				}
 			} else {
+				// No valid cart data, hide counter
 				$('.cd-cart-counter').hide();
 			}
 		}
 		
-		// Improved minicart content refresh function
-		function refreshMiniCartContent() {
-			console.log('Refreshing minicart content');
+		// Improved minicart content refresh function with proper empty state handling
+		function refreshMiniCartContent(forceUpdate = false) {
+			console.log('Refreshing minicart content, force update: ' + forceUpdate);
 			
 			// Add visual loading indicator
 			$('.cd-minicart-content').addClass('loading');
@@ -407,28 +418,27 @@ define([
 			var cartData = customerData.get('cart')();
 			console.log('Current cart data:', cartData);
 			
-			// First, check if sections data needs refreshing
-			$.ajax({
-				url: '/customer/section/load/?sections=cart&force_new_section_timestamp=true',
-				type: 'GET',
-				cache: false,
-				dataType: 'json',
-				success: function(response) {
-					console.log('Section load response:', response);
-					
-					if (response && response.cart) {
+			// Force a server-side refresh first
+			if (forceUpdate) {
+				$.ajax({
+					url: '/customer/section/load/?sections=cart&force_new_section_timestamp=true',
+					type: 'GET',
+					cache: false,
+					dataType: 'json',
+					success: function(response) {
+						console.log('Section load response:', response);
 						updateMinicartHtml();
-					} else {
-						console.log('No cart data in response, trying direct update');
+					},
+					error: function(error) {
+						console.error('Error refreshing cart sections:', error);
+						// Even if sections refresh fails, try direct HTML update
 						updateMinicartHtml();
 					}
-				},
-				error: function(error) {
-					console.error('Error refreshing cart sections:', error);
-					// Even if sections refresh fails, try direct HTML update
-					updateMinicartHtml();
-				}
-			});
+				});
+			} else {
+				// Just update the HTML without forcing a server refresh
+				updateMinicartHtml();
+			}
 		}
 		
 		// Function to update the minicart HTML content with error handling
@@ -441,10 +451,19 @@ define([
 				cache: false,
 				success: function(response) {
 					if (response) {
-						console.log('Minicart HTML received:', response.substr(0, 100) + '...');
+						console.log('Minicart HTML received');
 						
 						// Update the minicart items
 						$('.cd-minicart-items').html(response);
+						
+						// Check if the response contains the empty cart message
+						if (response.indexOf('cd-empty-cart') !== -1) {
+							// Hide cart counter since we know the cart is empty
+							$('.cd-cart-counter').hide();
+							
+							// Force a customer data refresh to sync frontend and backend
+							customerData.reload(['cart'], true);
+						}
 						
 						// Also update subtotal
 						updateSubtotal();
@@ -480,6 +499,39 @@ define([
 				},
 				error: function(error) {
 					console.error('Error updating subtotal:', error);
+				}
+			});
+		}
+		
+		// Create a proper cart initialization function
+		function initializeCart() {
+			console.log('Initializing cart');
+			
+			// Force a hard reset of cart data from server
+			customerData.invalidate(['cart']);
+			customerData.reload(['cart'], true).done(function(response) {
+				console.log('Cart data refreshed:', response);
+				
+				// Update cart counter after refresh
+				updateCartCounter();
+				
+				// Check if cart is empty and update UI accordingly
+				if (response.cart && typeof response.cart.summary_count !== 'undefined') {
+					var count = parseInt(response.cart.summary_count, 10);
+					if (count <= 0) {
+						// Ensure cart counter is hidden for empty cart
+						$('.cd-cart-counter').hide();
+						
+						// Update minicart content to show empty state
+						$('.cd-minicart-items').html(
+							'<div class="cd-empty-cart">' +
+							'<p>You have no items in your trolley.</p>' +
+							'</div>'
+						);
+					} else {
+						// Refresh minicart content to match current cart state
+						refreshMiniCartContent(true);
+					}
 				}
 			});
 		}
@@ -520,29 +572,42 @@ define([
 			});
 		}
 		
+		// Execute cart initialization on page load
+		initializeCart();
+		
 		$(document).ready(function() {
-			console.log('Header JS initialized with fixed toggle functionality');
+			console.log('Header JS initialized with improved cart handling');
 			
 			// Run the fix for unprocessed message templates
 			removeTemplateText();
 			
-			// Initialize minicart data
-			var cartData = customerData.get('cart');
-			
-			// Force an immediate refresh when page loads
-			customerData.reload(['cart'], true);
-			
 			// Setup cart data subscription with direct DOM updates
+			var cartData = customerData.get('cart');
 			cartData.subscribe(function(updatedCart) {
-				// Update cart counter
+				console.log('Cart data updated:', updatedCart);
+				
+				// Update cart counter based on new data
 				updateCartCounter();
 				
-				// Update minicart content
-				refreshMiniCartContent();
+				// Check if cart might be empty now
+				if (updatedCart && typeof updatedCart.summary_count !== 'undefined') {
+					var count = parseInt(updatedCart.summary_count, 10);
+					if (count <= 0) {
+						// Make sure counter is hidden
+						$('.cd-cart-counter').hide();
+						
+						// Show empty cart message
+						$('.cd-minicart-items').html(
+							'<div class="cd-empty-cart">' +
+							'<p>You have no items in your trolley.</p>' +
+							'</div>'
+						);
+					} else {
+						// Update minicart content
+						refreshMiniCartContent();
+					}
+				}
 			});
-			
-			// Initial update of cart counter
-			updateCartCounter();
 			
 			// Try again after document is ready
 			fixOverlayPosition();
@@ -609,9 +674,9 @@ define([
 				// Try the overlay fix again when opening minicart
 				fixOverlayPosition();
 				
-				// Force refresh of cart data and content
-				customerData.reload(['cart'], false);
-				refreshMiniCartContent();
+				// Force refresh of cart data and content BEFORE showing cart
+				customerData.reload(['cart'], true);
+				refreshMiniCartContent(true);
 				
 				// Check if mini cart is currently visible
 				if ($('#cd-minicart').hasClass('active')) {
@@ -653,6 +718,35 @@ define([
 				
 				// Allow body to scroll again
 				allowBodyScroll();
+			});
+			
+			// Listen for removing from cart events explicitly
+			$(document).on('ajax:removeFromCart', function() {
+				console.log('Item removed from cart event detected');
+				
+				// Force a hard reset of cart data
+				customerData.invalidate(['cart']);
+				customerData.reload(['cart'], true).done(function() {
+					// Update the minicart content with forced refresh
+					refreshMiniCartContent(true);
+				});
+			});
+			
+			// Clear cart detection - AJAX success handler
+			$(document).ajaxSuccess(function(event, xhr, settings) {
+				// Check if this might be a cart clear operation
+				if (settings.url.indexOf('checkout/cart/delete') !== -1 || 
+					settings.url.indexOf('checkout/cart/updatePost') !== -1) {
+					console.log('Potential cart clear operation detected');
+					
+					// Force a complete refresh of cart data
+					customerData.invalidate(['cart']);
+					customerData.reload(['cart'], true).done(function() {
+						// Update cart UI
+						updateCartCounter();
+						refreshMiniCartContent(true);
+					});
+				}
 			});
 			
 			// Improved event detection without blocking native messages
@@ -732,23 +826,13 @@ define([
 				}, 500);
 			});
 			
-			// Listen for remove from cart events
-			$(document).on('ajax:removeFromCart', function() {
-				// Refresh the cart data
+			// Add manual cart reset function for debugging
+			window.resetCartData = function() {
+				console.log('Manual cart reset triggered');
+				customerData.invalidate(['cart']);
 				customerData.reload(['cart'], true);
-				
-				// Update the minicart content
-				setTimeout(function() {
-					refreshMiniCartContent();
-				}, 500);
-			});
-			
-			// Manual testing function - for debugging from console
-			window.testCartRefresh = function() {
-				console.log('Manual cart refresh triggered');
-				customerData.reload(['cart'], true);
-				refreshMiniCartContent();
-				return 'Cart refresh triggered';
+				refreshMiniCartContent(true);
+				return 'Cart reset initiated';
 			};
 			
 			// Handle escape key
@@ -844,6 +928,11 @@ define([
 						return false;
 					};
 				}
+				
+				// Force a final cart refresh
+				setTimeout(function() {
+					initializeCart();
+				}, 1000);
 				
 				// Final check for template text
 				removeTemplateText();
