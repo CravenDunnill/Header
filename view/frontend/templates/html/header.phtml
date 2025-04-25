@@ -2,50 +2,6 @@
 /**
  * @var $block \CravenDunnill\Header\Block\Html\Header
  */
-
-/**
- * Helper function to get product image with fallback mechanism
- * 
- * @param \Magento\Catalog\Model\Product $product
- * @param \Magento\Catalog\Helper\Image $imageHelper
- * @param string $imageType
- * @param int $width
- * @param int $height
- * @return string
- */
-function getProductImageWithFallback($product, $imageHelper, $imageType = 'product_page_image_small', $width = 75, $height = 93.75) {
-	try {
-		// Try loading the thumbnail first
-		if ($product->getThumbnail() && $product->getThumbnail() != 'no_selection') {
-			return $imageHelper->init($product, $imageType)
-				->setImageFile($product->getThumbnail())
-				->resize($width, $height)
-				->getUrl();
-		}
-		
-		// If thumbnail is not available, try the small_image
-		if ($product->getSmallImage() && $product->getSmallImage() != 'no_selection') {
-			return $imageHelper->init($product, $imageType)
-				->setImageFile($product->getSmallImage())
-				->resize($width, $height)
-				->getUrl();
-		}
-		
-		// If small_image is not available, try the base image
-		if ($product->getImage() && $product->getImage() != 'no_selection') {
-			return $imageHelper->init($product, $imageType)
-				->setImageFile($product->getImage())
-				->resize($width, $height)
-				->getUrl();
-		}
-		
-		// If no product images are available, return placeholder
-		return $imageHelper->getDefaultPlaceholderUrl('thumbnail');
-	} catch (\Exception $e) {
-		// Return placeholder on any error
-		return $imageHelper->getDefaultPlaceholderUrl('thumbnail');
-	}
-}
 ?>
 <div class="cd-header-container">
 	<!-- Desktop Header -->
@@ -200,14 +156,49 @@ function getProductImageWithFallback($product, $imageHelper, $imageType = 'produ
 				
 				if (count($items) > 0) {
 					foreach($items as $item) {
-						// Get product
-						$product = $objectManager->create('Magento\Catalog\Model\Product')->load($item->getProduct()->getId());
+						// Get product - using the product repository for more reliable data
+						$productRepository = $objectManager->get('\Magento\Catalog\Api\ProductRepositoryInterface');
+						$product = $productRepository->getById($item->getProduct()->getId());
 						
-						// Get product image helper
+						// Get media URL for constructing direct image paths
+						$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+						$mediaUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+						
+						// Get image helper for placeholders
 						$imageHelper = $objectManager->get('\Magento\Catalog\Helper\Image');
 						
-						// Get product image with fallback
-						$imageUrl = getProductImageWithFallback($product, $imageHelper);
+						// Try to get the product image using a direct approach
+						try {
+							// Check for thumbnail first
+							$thumbnail = $product->getThumbnail();
+							$smallImage = $product->getSmallImage();
+							$baseImage = $product->getImage();
+							
+							// Uncomment for debugging
+							// echo "<!-- Debug: Thumbnail: {$thumbnail}, Small: {$smallImage}, Base: {$baseImage} -->";
+							
+							if ($thumbnail && $thumbnail != 'no_selection') {
+								// Direct path to thumbnail
+								$imageUrl = $mediaUrl . 'catalog/product' . $thumbnail;
+							} 
+							elseif ($smallImage && $smallImage != 'no_selection') {
+								// Fall back to small image
+								$imageUrl = $mediaUrl . 'catalog/product' . $smallImage;
+							}
+							elseif ($baseImage && $baseImage != 'no_selection') {
+								// Fall back to base image 
+								$imageUrl = $mediaUrl . 'catalog/product' . $baseImage;
+							}
+							else {
+								// No image available, use placeholder
+								$imageUrl = $imageHelper->getDefaultPlaceholderUrl('thumbnail');
+							}
+						} catch (\Exception $e) {
+							// Error occurred, use placeholder
+							$imageUrl = $imageHelper->getDefaultPlaceholderUrl('thumbnail');
+							// Uncomment for debugging
+							// echo "<!-- Image loading error: " . $e->getMessage() . " -->";
+						}
 						
 						// Get product URL
 						$productUrl = $product->getProductUrl();
