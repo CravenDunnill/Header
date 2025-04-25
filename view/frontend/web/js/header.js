@@ -6,6 +6,161 @@ define([
 	'use strict';
 	
 	return function(config) {
+		// Calculate and store scrollbar width on load
+		var calculateScrollbarWidth = function() {
+			// Create a temporary div with scrollbar
+			var scrollDiv = document.createElement('div');
+			scrollDiv.style.cssText = 'width: 100px; height: 100px; overflow: scroll; position: absolute; top: -9999px;';
+			document.body.appendChild(scrollDiv);
+			
+			// Calculate scrollbar width
+			var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+			document.body.removeChild(scrollDiv);
+			
+			// Store it as a CSS variable
+			document.documentElement.style.setProperty('--scrollbar-width', scrollbarWidth + 'px');
+			return scrollbarWidth;
+		};
+		
+		// Calculate scrollbar width on init
+		calculateScrollbarWidth();
+		
+		// SUPER AGGRESSIVE scroll prevention function
+		function preventBodyScroll() {
+			// Save current scroll position
+			var scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+			
+			// Store this value so we can restore it later
+			window.lastScrollPosition = scrollPosition;
+			
+			// Force create a style element if it doesn't exist
+			if (!window.scrollLockStyleElement) {
+				window.scrollLockStyleElement = document.createElement('style');
+				window.scrollLockStyleElement.type = 'text/css';
+				document.head.appendChild(window.scrollLockStyleElement);
+			}
+			
+			// Inject CSS rules that can't be overridden
+			window.scrollLockStyleElement.innerHTML = `
+				html, body {
+					overflow: hidden !important;
+					position: fixed !important;
+					width: 100% !important;
+					height: 100% !important;
+					max-height: 100% !important;
+					max-width: 100vw !important;
+					touch-action: none !important;
+					overscroll-behavior: none !important;
+					-webkit-overflow-scrolling: auto !important;
+					will-change: transform !important;
+					left: 0 !important;
+					right: 0 !important;
+				}
+				
+				html.scroll-locked, body.scroll-locked {
+					position: fixed !important;
+					overflow: hidden !important;
+				}
+				
+				body.scroll-locked {
+					top: -${scrollPosition}px !important;
+				}
+				
+				body.scroll-locked .cd-minicart {
+					top: -40px !important;
+					height: 100vh !important;
+					overflow-y: auto !important;
+				}
+				
+				body.scroll-locked .cd-minicart-content,
+				body.scroll-locked .cd-search-panel-inner {
+					overflow-y: auto !important;
+					-webkit-overflow-scrolling: touch !important;
+				}
+			`;
+			
+			// Apply necessary classes
+			document.documentElement.classList.add('scroll-locked');
+			document.body.classList.add('scroll-locked');
+			
+			// iOS-specific fixes - directly prevent touchmove events on body
+			window.scrollLockTouchmoveHandler = function(e) {
+				// Allow scrolling in minicart and search panel
+				let isInScrollableArea = false;
+				let target = e.target;
+				
+				// Check if the touch is in a scrollable area
+				while (target && target !== document.body) {
+					if (target.classList.contains('cd-minicart-content') || 
+						target.classList.contains('cd-search-panel-inner')) {
+						isInScrollableArea = true;
+						break;
+					}
+					target = target.parentNode;
+				}
+				
+				if (!isInScrollableArea) {
+					e.preventDefault();
+				}
+			};
+			
+			// Add the touchmove event listener
+			document.addEventListener('touchmove', window.scrollLockTouchmoveHandler, { passive: false });
+			
+			// Make absolutely sure the body is locked at the current scroll position
+			setTimeout(function() {
+				document.body.style.setProperty('top', `-${scrollPosition}px`, 'important');
+			}, 0);
+		}
+
+		// SUPER AGGRESSIVE scroll restoration function
+		function allowBodyScroll() {
+			// Remove the style element if it exists
+			if (window.scrollLockStyleElement) {
+				window.scrollLockStyleElement.innerHTML = '';
+			}
+			
+			// Remove applied classes
+			document.documentElement.classList.remove('scroll-locked');
+			document.body.classList.remove('scroll-locked');
+			
+			// Reset any inline styles
+			document.body.style.removeProperty('overflow');
+			document.body.style.removeProperty('position');
+			document.body.style.removeProperty('height');
+			document.body.style.removeProperty('width');
+			document.body.style.removeProperty('top');
+			document.body.style.removeProperty('touch-action');
+			
+			document.documentElement.style.removeProperty('overflow');
+			document.documentElement.style.removeProperty('position');
+			document.documentElement.style.removeProperty('height');
+			document.documentElement.style.removeProperty('width');
+			
+			// Remove the touchmove event listener
+			if (window.scrollLockTouchmoveHandler) {
+				document.removeEventListener('touchmove', window.scrollLockTouchmoveHandler, { passive: false });
+			}
+			
+			// Restore scroll position
+			const scrollPosition = window.lastScrollPosition || 0;
+			
+			// Use multiple methods to ensure scroll position is restored
+			setTimeout(function() {
+				window.scrollTo(0, scrollPosition);
+				if (scrollPosition > 0) {
+					$(window).scrollTop(scrollPosition);
+					document.documentElement.scrollTop = scrollPosition;
+					document.body.scrollTop = scrollPosition;
+					
+					// One more attempt with a tiny delay
+					setTimeout(function() {
+						window.scrollTo(0, scrollPosition);
+					}, 10);
+				}
+			}, 0);
+		}
+		
 		// Critical fix: Move the overlay to a position that won't cover the header
 		function fixOverlayPosition() {
 			// Move overlay to be a child of page-main instead of being at the top level
@@ -60,6 +215,9 @@ define([
 			// Remove blur from all elements
 			$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
 			
+			// Allow body to scroll again
+			allowBodyScroll();
+			
 			return false;
 		}
 		
@@ -67,6 +225,9 @@ define([
 		function showSearchPanel() {
 			// Try the overlay fix again when opening search
 			fixOverlayPosition();
+			
+			// Prevent body scrolling
+			preventBodyScroll();
 			
 			// Explicitly show the search panel
 			$('#cd-search-panel').show();
@@ -201,6 +362,9 @@ define([
 				// Remove blur from all elements
 				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
 				
+				// Allow body to scroll again
+				allowBodyScroll();
+				
 				e.preventDefault();
 				e.stopPropagation();
 				return false;
@@ -225,7 +389,13 @@ define([
 					
 					// Remove blur from content
 					$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+					
+					// Allow body to scroll again
+					allowBodyScroll();
 				} else {
+					// Prevent body scrolling
+					preventBodyScroll();
+					
 					// Show minicart
 					$('#cd-minicart').addClass('active');
 					$('#cd-overlay').show();
@@ -248,6 +418,9 @@ define([
 				
 				// Remove blur from all elements
 				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+				
+				// Allow body to scroll again
+				allowBodyScroll();
 			});
 			
 			// Handle escape key
@@ -259,8 +432,23 @@ define([
 					
 					// Remove blur from all elements
 					$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+					
+					// Allow body to scroll again
+					allowBodyScroll();
 				}
 			});
+			
+			// Make sure scroll is always restored when navigating away
+			$(window).on('beforeunload', function() {
+				allowBodyScroll();
+			});
+			
+			// Apply scroll locking immediately when needed
+			$('#cd-search-button, #cd-search-button-mobile, #cd-cart-trigger, #cd-cart-trigger-mobile')
+				.on('mousedown touchstart', function() {
+					// Pre-calculate scrollbar width to avoid layout shifts
+					calculateScrollbarWidth();
+				});
 			
 			// Update cart counter when cart is updated
 			$(document).on('ajax:updateCartItemQty ajax:addToCart', function() {
@@ -276,6 +464,9 @@ define([
 			
 			// Apply no-blur protection on window load as well
 			$(window).on('load', function() {
+				// Recalculate scrollbar width on window load
+				calculateScrollbarWidth();
+				
 				// Fix overlay positioning once more
 				fixOverlayPosition();
 				
@@ -315,6 +506,9 @@ define([
 							minicart.classList.remove('active');
 						}
 						
+						// Allow body to scroll again
+						allowBodyScroll();
+						
 						if (e) {
 							e.preventDefault();
 							e.stopPropagation();
@@ -322,6 +516,12 @@ define([
 						return false;
 					};
 				}
+			});
+			
+			// Handle resize events
+			$(window).on('resize', function() {
+				// Recalculate scrollbar width on resize
+				calculateScrollbarWidth();
 			});
 		});
 	};

@@ -12,6 +12,7 @@ html, body {
 	position: relative;
 	z-index: 1000;
 	overflow: visible !important;
+	border-bottom: 1px solid #ddd;
 }
 
 /* Cart counter bubble */
@@ -19,8 +20,8 @@ html, body {
 	position: absolute;
 	top: -5px;
 	right: -5px;
-	width: 14px;
-	height: 14px;
+	width: 10px;
+	height: 10px;
 	border-radius: 50%;
 	background-color: #DB804A;
 	display: flex;
@@ -69,8 +70,9 @@ html, body {
 	width: 100%;
 	background: #fff;
 	padding: 20px;
-	box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+	box-shadow: 0 10px 10px rgba(0,0,0,0.1);
 	display: none;
+	border-top: 1px solid #122C58;
 	z-index: 1101 !important; /* Make sure it's properly layered */
 }
 
@@ -124,23 +126,23 @@ html, body {
 	z-index: 1102 !important; /* Ensure the close button is clickable */
 }
 
-/* Fixed Mini Cart - Truly Hidden Unless Active */
+/* Fixed Mini Cart - Updated with top: -40px */
 .cd-minicart {
 	position: fixed !important;
-	top: 0 !important;
+	top: -40px !important; /* Added as requested */
 	right: -450px !important; /* Position off-screen */
 	width: 400px !important;
 	max-width: 90% !important;
-	height: 100dvh !important; /* Using dynamic viewport height for better mobile handling */
+	height: 100vh !important; /* Standard viewport height */
 	background: #fff !important;
 	box-shadow: -5px 0 15px rgba(0,0,0,0.1) !important;
-	transition: right 0.3s ease, visibility 0.3s ease, opacity 0.3s ease !important; /* Transition all properties */
+	transition: right 0.3s ease, visibility 0.3s ease, opacity 0.3s ease !important;
 	z-index: 9999 !important;
 	display: flex !important;
 	flex-direction: column !important;
 	overflow-y: auto !important;
-	visibility: hidden !important; /* Hide completely, not just off-screen */
-	opacity: 0 !important; /* Also make it invisible */
+	visibility: hidden !important;
+	opacity: 0 !important;
 }
 
 /* Active state - visible and on-screen */
@@ -183,7 +185,7 @@ html, body {
 	overflow-y: auto;
 	padding: 20px;
 	min-height: 100px;
-	max-height: calc(100dvh - 195px); /* Adjusted to accommodate the larger footer, also using dvh */
+	max-height: calc(100vh - 195px); /* Adjusted to accommodate the larger footer, also using vh */
 	overflow-y: auto;
 }
 
@@ -425,7 +427,6 @@ body.minicart-active .cd-overlay {
 		align-items: center;
 		padding: 20px 30px;
 		background: #fff;
-		border-bottom: 1px solid #eee;
 		max-width: var(--container-max-width, 1280px);
 		margin: 0 auto;
 	}
@@ -574,4 +575,83 @@ header.page-header,
 .cd-logo:hover img,
 .cd-logo-mobile:hover img {
 	filter: brightness(0.95) sepia(0.2) saturate(2) hue-rotate(-5deg);
+}
+
+/* Super aggressive scroll prevention classes */
+html.scroll-locked,
+body.scroll-locked {
+	overflow: hidden !important;
+	position: fixed !important;
+	width: 100% !important;
+	height: 100% !important;
+	max-height: 100% !important;
+	max-width: 100vw !important;
+	touch-action: none !important;
+	overscroll-behavior: none !important;
+	-webkit-overflow-scrolling: auto !important;
+	will-change: transform !important;
+	left: 0 !important;
+	right: 0 !important;
+}
+
+body.scroll-locked {
+	/* The top value is set dynamically by JS */
+}
+
+/* Ensure mini-cart maintains the top: -40px even when body is fixed */
+body.scroll-locked .cd-minicart {
+	top: -40px !important;
+	height: 100vh !important;
+	overflow-y: auto !important;
+	right: 0 !important;
+}
+
+/* Ensure content areas inside the minicart remain scrollable */
+body.scroll-locked .cd-minicart-content {
+	max-height: calc(100vh - 195px) !important;
+	overflow-y: auto !important;
+	-webkit-overflow-scrolling: touch !important;
+}
+
+/* Hide scrollbar on locked body but allow scrolling in needed areas */
+body.scroll-locked .cd-minicart-content::-webkit-scrollbar,
+body.scroll-locked .cd-search-panel-inner::-webkit-scrollbar {
+	-webkit-appearance: none;
+	width: 7px;
+}
+
+body.scroll-locked .cd-minicart-content::-webkit-scrollbar-thumb,
+body.scroll-locked .cd-search-panel-inner::-webkit-scrollbar-thumb {
+	border-radius: 4px;
+	background-color: rgba(0, 0, 0, .3);
+	-webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+	body.scroll-locked {
+		/* Prevents Momentum Scrolling on iOS Safari */
+		-webkit-overflow-scrolling: auto !important;
+	}
+	
+	body.scroll-locked .cd-minicart-content,
+	body.scroll-locked .cd-search-panel-inner {
+		/* But allow momentum scrolling inside these containers */
+		-webkit-overflow-scrolling: touch !important;
+	}
+}
+
+/* For Firefox */
+@-moz-document url-prefix() {
+	body.scroll-locked {
+		scrollbar-width: none;
+	}
+}
+
+/* Specifically target Android Chrome */
+@supports (background: -webkit-named-image(i)) {
+	body.scroll-locked {
+		position: fixed !important;
+		overflow: hidden !important;
+	}
 }
