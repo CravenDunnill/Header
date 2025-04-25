@@ -389,8 +389,8 @@ define([
 				var summaryCount = parseInt(cartData().summary_count, 10);
 				
 				if (summaryCount > 0) {
-					// Show counter with animation
-					$('.cd-cart-counter').text(summaryCount).show();
+					// Show counter without text - just show the element
+					$('.cd-cart-counter').show();
 					// Add animation class
 					$('.cd-cart-counter').addClass('updated');
 					// Remove class after animation completes
