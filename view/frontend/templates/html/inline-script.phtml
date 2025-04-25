@@ -1,0 +1,80 @@
+<style>
+/* Hide only the raw template text, not the actual message containers */
+.page.messages > *:not(.message-success):not(.message-error):not(.message-notice):not(.message-warning):empty,
+.messages > *:not(.message-success):not(.message-error):not(.message-notice):not(.message-warning):empty {
+	display: none !important;
+}
+</style>
+
+<script type="text/javascript">
+// Inline script to clean up template text but preserve messages
+(function() {
+	// Function to selectively clean text nodes
+	function cleanTemplateText() {
+		var walkDOM = function(node) {
+			// Only process if we have a node
+			if (!node) return;
+			
+			// If it's a text node
+			if (node.nodeType === 3) {
+				var text = node.nodeValue;
+				if (text && text.indexOf('Magento_Theme/js/view/message') !== -1) {
+					node.nodeValue = '';
+				}
+			} 
+			// If it's an element node
+			else if (node.nodeType === 1) {
+				// Skip if it's a real message
+				if (node.classList && (
+					node.classList.contains('message-success') || 
+					node.classList.contains('message-error') || 
+					node.classList.contains('message-notice') || 
+					node.classList.contains('message-warning')
+				)) {
+					return;
+				}
+				
+				// Skip script and style tags
+				if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+					// Recurse for children
+					for (var i = 0; i < node.childNodes.length; i++) {
+						walkDOM(node.childNodes[i]);
+					}
+				}
+			}
+		};
+		
+		// Start walking from message containers only
+		var messageContainers = document.querySelectorAll('.page.messages, .messages');
+		for (var i = 0; i < messageContainers.length; i++) {
+			walkDOM(messageContainers[i]);
+		}
+		
+		// Also ensure any actual messages are visible
+		var messages = document.querySelectorAll('.message-success, .message-error, .message-notice, .message-warning');
+		for (var j = 0; j < messages.length; j++) {
+			if (messages[j]) {
+				messages[j].style.display = 'block';
+				messages[j].style.visibility = 'visible';
+				messages[j].style.opacity = '1';
+				
+				// Make sure message container is also visible
+				var parent = messages[j].parentNode;
+				if (parent && (parent.classList.contains('page.messages') || parent.classList.contains('messages'))) {
+					parent.style.display = 'block';
+					parent.style.visibility = 'visible';
+					parent.style.opacity = '1';
+				}
+			}
+		}
+	}
+	
+	// Run when DOM is ready
+	document.addEventListener('DOMContentLoaded', function() {
+		cleanTemplateText();
+	});
+	
+	// Run periodically to catch any dynamic updates
+	setInterval(cleanTemplateText, 500);
+})();
+</script>
