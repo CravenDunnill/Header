@@ -178,7 +178,8 @@ define([
 				// Check if the touch is in a scrollable area
 				while (target && target !== document.body) {
 					if (target.classList.contains('cd-minicart-content') || 
-						target.classList.contains('cd-search-panel-inner')) {
+						target.classList.contains('cd-search-panel-inner') ||
+						target.classList.contains('cd-mobile-menu-content')) {
 						isInScrollableArea = true;
 						break;
 					}
@@ -652,6 +653,9 @@ define([
 				// Close minicart
 				$('#cd-minicart').removeClass('active');
 				
+				// Close mobile menu
+				$('#cd-mobile-menu').removeClass('active');
+				
 				// Hide overlay
 				$('#cd-overlay').hide();
 				
@@ -718,6 +722,79 @@ define([
 				
 				// Allow body to scroll again
 				allowBodyScroll();
+			});
+			
+			// Mobile Menu Functionality 
+			$('#cd-menu-button').off('click').on('click', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				
+				console.log('Mobile menu button clicked');
+				
+				// Try the overlay fix again when opening mobile menu
+				fixOverlayPosition();
+				
+				// Check if mobile menu is currently visible
+				if ($('#cd-mobile-menu').hasClass('active')) {
+					// Hide mobile menu
+					$('#cd-mobile-menu').removeClass('active');
+					$('#cd-overlay').hide();
+					
+					// Remove blur from content
+					$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+					
+					// Allow body to scroll again
+					allowBodyScroll();
+				} else {
+					// Prevent body scrolling
+					preventBodyScroll();
+					
+					// Show mobile menu
+					$('#cd-mobile-menu').addClass('active');
+					$('#cd-overlay').show();
+					
+					// Apply blur to content areas
+					$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
+					
+					// Ensure header is not blurred
+					$('.page-header, header.page-header, .cd-header-container').css({
+						'filter': 'none',
+						'z-index': '1200'
+					});
+				}
+			});
+			
+			// Mobile Menu Close Button
+			$('#cd-mobile-menu-close').on('click', function(e) {
+				e.preventDefault();
+				
+				// Hide mobile menu
+				$('#cd-mobile-menu').removeClass('active');
+				$('#cd-overlay').hide();
+				
+				// Remove blur from all elements
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+				
+				// Allow body to scroll again
+				allowBodyScroll();
+			});
+			
+			// Submenu toggles in mobile menu
+			$('.cd-mobile-nav-toggle').on('click', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				
+				var $this = $(this);
+				var $sublist = $this.siblings('.cd-mobile-nav-sublist');
+				
+				// Toggle active class for arrow rotation
+				$this.toggleClass('active');
+				
+				// Toggle submenu visibility
+				$sublist.toggleClass('active');
+				
+				// Prevent event bubbling to parent elements
+				return false;
 			});
 			
 			// Listen for removing from cart events explicitly
@@ -840,6 +917,7 @@ define([
 				if (e.key === "Escape") {
 					$('#cd-search-panel').hide();
 					$('#cd-minicart').removeClass('active');
+					$('#cd-mobile-menu').removeClass('active');
 					$('#cd-overlay').hide();
 					
 					// Remove blur from all elements
@@ -856,7 +934,7 @@ define([
 			});
 			
 			// Apply scroll locking immediately when needed
-			$('#cd-search-button, #cd-search-button-mobile, #cd-cart-trigger, #cd-cart-trigger-mobile')
+			$('#cd-search-button, #cd-search-button-mobile, #cd-cart-trigger, #cd-cart-trigger-mobile, #cd-menu-button')
 				.on('mousedown touchstart', function() {
 					// Pre-calculate scrollbar width to avoid layout shifts
 					calculateScrollbarWidth();
@@ -867,11 +945,6 @@ define([
 				setTimeout(function() {
 					updateCartCounter();
 				}, 1000);
-			});
-			
-			// Mobile menu toggle
-			$('#cd-menu-button').on('click', function() {
-				$('nav.navigation').toggle();
 			});
 			
 			// Apply no-blur protection on window load as well
@@ -918,6 +991,12 @@ define([
 							minicart.classList.remove('active');
 						}
 						
+						// Also close mobile menu
+						var mobileMenu = document.getElementById('cd-mobile-menu');
+						if (mobileMenu) {
+							mobileMenu.classList.remove('active');
+						}
+						
 						// Allow body to scroll again
 						allowBodyScroll();
 						
@@ -928,6 +1007,102 @@ define([
 						return false;
 					};
 				}
+				
+				// Mobile menu direct DOM handlers
+				if (document.getElementById('cd-menu-button')) {
+					document.getElementById('cd-menu-button').onclick = function(e) {
+						e.preventDefault();
+						e.stopPropagation();
+						
+						console.log('Mobile menu button clicked (direct DOM)');
+						
+						// Check if mobile menu is currently visible
+						var mobileMenu = document.getElementById('cd-mobile-menu');
+						var isVisible = mobileMenu && mobileMenu.classList.contains('active');
+						
+						if (isVisible) {
+							// Hide mobile menu
+							mobileMenu.classList.remove('active');
+							document.getElementById('cd-overlay').style.display = 'none';
+							
+							// Remove blur
+							document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
+								if (el) el.style.filter = 'none';
+							});
+							
+							// Allow scrolling
+							allowBodyScroll();
+						} else {
+							// Fix overlay position
+							fixOverlayPosition();
+							
+							// Prevent scrolling
+							preventBodyScroll();
+							
+							// Show mobile menu
+							mobileMenu.classList.add('active');
+							document.getElementById('cd-overlay').style.display = 'block';
+							
+							// Apply blur
+							document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
+								if (el) el.style.filter = 'blur(4px)';
+							});
+							
+							// Ensure header is not blurred
+							document.querySelectorAll('.page-header, header.page-header, .cd-header-container').forEach(function(el) {
+								if (el) {
+									el.style.filter = 'none';
+									el.style.zIndex = '1200';
+								}
+							});
+						}
+						
+						return false;
+					};
+				}
+				
+				if (document.getElementById('cd-mobile-menu-close')) {
+					document.getElementById('cd-mobile-menu-close').onclick = function(e) {
+						e.preventDefault();
+						
+						// Hide mobile menu
+						document.getElementById('cd-mobile-menu').classList.remove('active');
+						document.getElementById('cd-overlay').style.display = 'none';
+						
+						// Remove blur
+						document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
+							if (el) el.style.filter = 'none';
+						});
+						
+						// Allow scrolling
+						allowBodyScroll();
+						
+						return false;
+					};
+				}
+				
+				// Setup mobile submenu toggles
+				document.querySelectorAll('.cd-mobile-nav-toggle').forEach(function(toggle) {
+					toggle.onclick = function(e) {
+						e.preventDefault();
+						e.stopPropagation();
+						
+						// Toggle active class for rotation
+						this.classList.toggle('active');
+						
+						// Find sibling submenu
+						var sublist = this.nextElementSibling;
+						while (sublist && !sublist.classList.contains('cd-mobile-nav-sublist')) {
+							sublist = sublist.nextElementSibling;
+						}
+						
+						if (sublist) {
+							sublist.classList.toggle('active');
+						}
+						
+						return false;
+					};
+				});
 				
 				// Force a final cart refresh
 				setTimeout(function() {

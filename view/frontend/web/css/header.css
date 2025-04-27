@@ -388,6 +388,12 @@ body.minicart-active .cd-overlay {
 	text-decoration: none;
 }
 
+.cd-logo-mobile img {
+	max-height: 18px;
+	height: auto;
+	width: auto;
+}
+
 .cd-search-button-mobile {
 	display: flex;
 	align-items: center;
@@ -486,6 +492,7 @@ body.minicart-active .cd-overlay {
 		width: 100% !important; /* Full width on mobile */
 		max-width: 100% !important; /* Ensure no max-width restriction */
 		right: -100% !important; /* Position off-screen by full width */
+		top: 0 !important;
 	}
 	
 	.cd-minicart-button {
@@ -495,6 +502,10 @@ body.minicart-active .cd-overlay {
 	
 	.cd-minicart-footer {
 		padding: 12px 15px;
+	}
+	
+	body.scroll-locked .cd-minicart {
+		top: 0 !important;
 	}
 }
 
@@ -876,4 +887,271 @@ script[type="text/x-magento-init"],
 	display: block !important;
 	visibility: visible !important;
 	opacity: 1 !important;
+}
+
+/* Mobile Menu Styles */
+.cd-mobile-menu {
+	position: fixed !important;
+	top: -40px !important; /* Same as minicart */
+	left: -450px !important; /* Position off-screen on the left side */
+	width: 400px !important;
+	max-width: 90% !important;
+	height: 100vh !important;
+	background: #fff !important;
+	box-shadow: 5px 0 15px rgba(0,0,0,0.1) !important;
+	transition: left 0.3s ease, visibility 0.3s ease, opacity 0.3s ease !important;
+	z-index: 9999 !important;
+	display: flex !important;
+	flex-direction: column !important;
+	overflow-y: auto !important;
+	visibility: hidden !important;
+	opacity: 0 !important;
+}
+
+/* Active state - visible and on-screen */
+.cd-mobile-menu.active {
+	left: 0 !important;
+	visibility: visible !important;
+	opacity: 1 !important;
+}
+
+/* Mobile menu header */
+.cd-mobile-menu-header {
+	position: sticky !important;
+	top: 0 !important;
+	z-index: 10000 !important;
+	background: #fff !important;
+	padding: 15px 20px !important;
+	border-bottom: 1px solid #eee !important;
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+}
+
+.cd-mobile-menu-header h3 {
+	margin: 0;
+	font-size: 18px;
+	color: #122C58;
+	font-weight: 200;
+}
+
+.cd-mobile-menu-close {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 5px;
+	font-weight: 200;
+}
+
+.cd-mobile-menu-content {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px;
+	min-height: 100px;
+	max-height: calc(100vh - 195px);
+	overflow-y: auto;
+}
+
+/* Mobile navigation lists */
+.cd-mobile-nav-list,
+.cd-mobile-nav-sublist {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.cd-mobile-nav-item {
+	border-bottom: 1px solid #f0f0f0;
+	position: relative;
+}
+
+.cd-mobile-nav-link {
+	display: block;
+	padding: 15px 0;
+	color: #122C58;
+	text-decoration: none;
+	font-size: 16px;
+	font-weight: 400;
+}
+
+.cd-mobile-nav-toggle {
+	position: absolute;
+	right: 0;
+	top: 15px;
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: transform 0.3s ease;
+}
+
+.cd-mobile-nav-toggle.active {
+	transform: rotate(180deg);
+}
+
+.cd-mobile-nav-sublist {
+	padding-left: 15px;
+	overflow: hidden;
+	max-height: 0;
+	transition: max-height 0.3s ease-out;
+}
+
+.cd-mobile-nav-sublist.active {
+	max-height: 500px;
+	transition: max-height 0.5s ease-in;
+}
+
+.cd-mobile-nav-subitem {
+	border-bottom: 1px solid #f5f5f5;
+}
+
+.cd-mobile-nav-subitem:last-child {
+	border-bottom: none;
+}
+
+.cd-mobile-nav-sublink {
+	display: block;
+	padding: 12px 0;
+	color: #555;
+	text-decoration: none;
+	font-size: 14px;
+}
+
+/* Mobile account links section */
+.cd-mobile-account-links {
+	margin-top: 30px;
+	padding-top: 20px;
+	border-top: 1px solid #eee;
+}
+
+.cd-mobile-account-link {
+	display: flex;
+	align-items: center;
+	padding: 12px 0;
+	color: #122C58;
+	text-decoration: none;
+	font-size: 16px;
+	font-weight: 400;
+}
+
+.cd-mobile-account-link svg {
+	margin-right: 15px;
+}
+
+/* Mobile menu button styles */
+.cd-menu-button {
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+}
+
+.cd-menu-button:hover svg {
+	stroke: #DB804A;
+}
+
+/* Mobile menu adjustments */
+@media screen and (max-width: 767px) {
+	.cd-mobile-menu {
+		width: 85% !important; /* Slightly narrower on smallest screens */
+		max-width: 300px !important;
+	}
+	
+	.cd-mobile-nav-link,
+	.cd-mobile-account-link {
+		font-size: 15px;
+	}
+}
+
+/* Ensure mobile menu remains scrollable when body is locked */
+body.scroll-locked .cd-mobile-menu {
+	top: -40px !important;
+	height: 100vh !important;
+	overflow-y: auto !important;
+	left: 0 !important;
+}
+
+body.scroll-locked .cd-mobile-menu-content {
+	max-height: calc(100vh - 195px) !important;
+	overflow-y: auto !important;
+	-webkit-overflow-scrolling: touch !important;
+}
+
+
+/* Mobile Menu Styles - Updated for full width */
+.cd-mobile-menu {
+	position: fixed !important;
+	top: 0px !important; /* Same as minicart */
+	left: -100% !important; /* Position off-screen on the left side (full width) */
+	width: 100% !important; /* Full width of the screen */
+	max-width: 100% !important; /* Ensure it's always 100% width */
+	height: 100vh !important;
+	background: #fff !important;
+	box-shadow: 5px 0 15px rgba(0,0,0,0.1) !important;
+	transition: left 0.3s ease, visibility 0.3s ease, opacity 0.3s ease !important;
+	z-index: 9999 !important;
+	display: flex !important;
+	flex-direction: column !important;
+	overflow-y: auto !important;
+	visibility: hidden !important;
+	opacity: 0 !important;
+}
+
+/* Active state - visible and on-screen */
+.cd-mobile-menu.active {
+	left: 0 !important;
+	visibility: visible !important;
+	opacity: 1 !important;
+}
+
+/* Mobile menu header - update to position close button on right */
+.cd-mobile-menu-header {
+	position: sticky !important;
+	top: 0 !important;
+	z-index: 10000 !important;
+	background: #fff !important;
+	padding: 15px 20px !important;
+	border-bottom: 1px solid #eee !important;
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+}
+
+/* Push the title to the left */
+.cd-mobile-menu-header h3 {
+	margin: 0;
+	font-size: 18px;
+	color: #122C58;
+	font-weight: 200;
+	flex: 1;
+	text-align: left;
+}
+
+/* Enhanced close button - positioned right */
+.cd-mobile-menu-close {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 5px;
+	font-weight: 200;
+	font-size: 24px;
+	line-height: 1;
+	margin-left: auto;
+}
+
+/* Ensure mobile menu remains scrollable when body is locked */
+body.scroll-locked .cd-mobile-menu {
+	top: -40px !important;
+	height: 100vh !important;
+	overflow-y: auto !important;
+	left: 0 !important;
+}
+
+body.scroll-locked .cd-mobile-menu-content {
+	max-height: calc(100vh - 195px) !important;
+	overflow-y: auto !important;
+	-webkit-overflow-scrolling: touch !important;
 }

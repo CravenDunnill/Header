@@ -282,6 +282,102 @@
 		</div>
 	</div>
 	
+	<!-- Mobile Menu Slide-out -->
+	<div class="cd-mobile-menu" id="cd-mobile-menu">
+		<div class="cd-mobile-menu-header">
+			<h3>Shop Craven Dunnill</h3>
+			<button type="button" class="cd-mobile-menu-close" id="cd-mobile-menu-close">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
+		</div>
+		<div class="cd-mobile-menu-content">
+			<nav class="cd-mobile-nav">
+				<ul class="cd-mobile-nav-list">
+					<li class="cd-mobile-nav-item">
+						<a href="<?= $block->getBaseUrl() ?>" class="cd-mobile-nav-link">Home</a>
+					</li>
+					
+					<?php
+					// Get category structure
+					$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+					$categoryHelper = $objectManager->get('\Magento\Catalog\Helper\Category');
+					$categoryFactory = $objectManager->get('\Magento\Catalog\Model\CategoryFactory');
+					$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+					
+					// Get store ID
+					$storeId = $storeManager->getStore()->getId();
+					
+					// Get root category ID
+					$rootCategoryId = $storeManager->getStore($storeId)->getRootCategoryId();
+					
+					// Get category object
+					$rootCategory = $categoryFactory->create()->load($rootCategoryId);
+					
+					// Get all categories under root
+					$topCategories = $rootCategory->getChildrenCategories();
+					
+					// Output categories
+					foreach ($topCategories as $category):
+						if (!$category->getIsActive()) continue; // Skip inactive categories
+					?>
+						<li class="cd-mobile-nav-item has-children">
+							<a href="<?= $categoryHelper->getCategoryUrl($category) ?>" class="cd-mobile-nav-link">
+								<?= $category->getName() ?>
+							</a>
+							<?php
+							// Check for subcategories
+							$subcategories = $category->getChildrenCategories();
+							if (count($subcategories)): 
+							?>
+								<span class="cd-mobile-nav-toggle">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<polyline points="6 9 12 15 18 9"></polyline>
+									</svg>
+								</span>
+								<ul class="cd-mobile-nav-sublist">
+									<?php foreach ($subcategories as $subcategory):
+										if (!$subcategory->getIsActive()) continue; // Skip inactive subcategories 
+									?>
+										<li class="cd-mobile-nav-subitem">
+											<a href="<?= $categoryHelper->getCategoryUrl($subcategory) ?>" class="cd-mobile-nav-sublink">
+												<?= $subcategory->getName() ?>
+											</a>
+										</li>
+									<?php endforeach; ?>
+								</ul>
+							<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+					
+					<li class="cd-mobile-nav-item">
+						<a href="#" class="cd-mobile-nav-link">About Us</a>
+					</li>
+					<li class="cd-mobile-nav-item">
+						<a href="#" class="cd-mobile-nav-link">Contact</a>
+					</li>
+				</ul>
+			</nav>
+			<div class="cd-mobile-account-links">
+				<a href="<?= $block->getAccountUrl() ?>" class="cd-mobile-account-link">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+						<circle cx="12" cy="7" r="4"></circle>
+					</svg>
+					My Account
+				</a>
+				<a href="<?= $block->getWishlistUrl() ?>" class="cd-mobile-account-link">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+					</svg>
+					Your Project
+				</a>
+			</div>
+		</div>
+	</div>
+	
 	<!-- Simple Overlay -->
 	<div class="cd-overlay" id="cd-overlay"></div>
 	
@@ -322,6 +418,12 @@
 							var minicart = document.getElementById('cd-minicart');
 							if (minicart) {
 								minicart.classList.remove('active');
+							}
+							
+							// Close mobile menu if open
+							var mobileMenu = document.getElementById('cd-mobile-menu');
+							if (mobileMenu) {
+								mobileMenu.classList.remove('active');
 							}
 							
 							// Remove blur from all elements
@@ -532,6 +634,9 @@
 				// Hide search panel
 				$('#cd-search-panel').hide();
 				
+				// Hide mobile menu
+				$('#cd-mobile-menu').removeClass('active');
+				
 				// Hide overlay
 				$(this).css('display', 'none');
 				
@@ -544,9 +649,59 @@
 				if (e.key === "Escape") {
 					$('#cd-minicart').removeClass('active');
 					$('#cd-search-panel').hide();
+					$('#cd-mobile-menu').removeClass('active');
 					$('#cd-overlay').hide();
 					$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
 				}
+			});
+			
+			// Mobile menu toggle button
+			$('#cd-menu-button').on('click', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				
+				console.log('Mobile menu button clicked');
+				
+				// Show mobile menu
+				$('#cd-mobile-menu').addClass('active');
+				
+				// Show overlay
+				$('#cd-overlay').css('display', 'block');
+				
+				// Apply blur effect to content
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
+			});
+			
+			// Mobile menu close button
+			$('#cd-mobile-menu-close').on('click', function(e) {
+				e.preventDefault();
+				
+				// Hide mobile menu
+				$('#cd-mobile-menu').removeClass('active');
+				
+				// Hide overlay
+				$('#cd-overlay').css('display', 'none');
+				
+				// Remove blur effect
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+			});
+			
+			// Mobile submenu toggle
+			$('.cd-mobile-nav-toggle').on('click', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				
+				var $this = $(this);
+				var $sublist = $this.siblings('.cd-mobile-nav-sublist');
+				
+				// Toggle active class for arrow rotation
+				$this.toggleClass('active');
+				
+				// Toggle submenu visibility
+				$sublist.toggleClass('active');
+				
+				// Prevent event bubbling to parent elements
+				return false;
 			});
 		});
 	});
