@@ -179,7 +179,8 @@ define([
 				while (target && target !== document.body) {
 					if (target.classList.contains('cd-minicart-content') || 
 						target.classList.contains('cd-search-panel-inner') ||
-						target.classList.contains('cd-mobile-menu-content')) {
+						target.classList.contains('cd-mobile-menu-content') ||
+						target.classList.contains('cd-mobile-account-footer')) {
 						isInScrollableArea = true;
 						break;
 					}
