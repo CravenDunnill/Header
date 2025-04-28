@@ -9,6 +9,9 @@ define([
 ], function ($, ko, Component, customerData, priceUtils, modal, $t) {
 	'use strict';
 
+	// Debug - make customer data accessible globally for debugging
+	window.customerData = customerData;
+
 	return Component.extend({
 		defaults: {
 			template: 'CravenDunnill_Header::ko/checkout/minicart.phtml',
@@ -28,6 +31,7 @@ define([
 			// Subscribe to cart data changes
 			this.cart = customerData.get('cart');
 			this.cart.subscribe(function (updatedCart) {
+				console.log('Cart updated:', updatedCart);
 				self.cartData = updatedCart;
 				self.cartItems(self.getCartItems());
 				
@@ -45,6 +49,7 @@ define([
 			
 			// Set initial cart data
 			this.cartData = customerData.get('cart')();
+			console.log('Initial cart data:', this.cartData);
 			
 			// Register closeMinicart function
 			this.closeMinicart = function() {
@@ -74,8 +79,18 @@ define([
 		 */
 		getCartItems: function() {
 			var items = [];
-			if (this.cartData.items && this.cartData.items.length) {
+			if (this.cartData && this.cartData.items && this.cartData.items.length) {
+				console.log('Cart has items:', this.cartData.items.length);
 				items = this.cartData.items;
+				
+				// Debug - log each item
+				items.forEach(function(item, index) {
+					console.log('Item ' + index + ':', item);
+					console.log('  - price:', item.product_price);
+					console.log('  - image:', item.product_image);
+				});
+			} else {
+				console.log('No items in cart data');
 			}
 			return items;
 		},
@@ -129,12 +144,35 @@ define([
 		 * @returns {Object}
 		 */
 		getItemProductImageData: function(item) {
-			return {
-				src: item.product_image.src,
-				alt: item.product_image.alt,
-				width: item.product_image.width,
-				height: item.product_image.height
+			var imageData = {
+				src: '',
+				alt: item.product_name || '',
+				width: 75,
+				height: 94
 			};
+			
+			if (item.product_image) {
+				// If product_image is a string URL
+				if (typeof item.product_image === 'string') {
+					imageData.src = item.product_image;
+				} 
+				// If it's a proper object with src property
+				else if (item.product_image.src) {
+					imageData.src = item.product_image.src;
+					if (item.product_image.alt) {
+						imageData.alt = item.product_image.alt;
+					}
+					if (item.product_image.width) {
+						imageData.width = item.product_image.width;
+					}
+					if (item.product_image.height) {
+						imageData.height = item.product_image.height;
+					}
+				}
+			}
+			
+			console.log('Image data for item:', imageData);
+			return imageData;
 		}
 	});
 });

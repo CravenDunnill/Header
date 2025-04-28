@@ -22,49 +22,74 @@
 			<div class="items-total" style="display: none;">
 				<span class="count" data-bind="text: getCartParam('summary_count')"></span>
 				<!-- ko if: (getCartParam('summary_count') > 1) -->
-					<span data-bind="i18n: 'Items in Trolley'"></span>
+					<span data-bind="i18n: 'Items in Cart'"></span>
 				<!--/ko-->
 				<!-- ko if: (getCartParam('summary_count') == 1) -->
-					<span data-bind="i18n: 'Item in Trolley'"></span>
+					<span data-bind="i18n: 'Item in Cart'"></span>
 				<!--/ko-->
 			</div>
 
 			<div data-action="scroll" class="minicart-items-wrapper">
 				<ol id="mini-cart" class="minicart-items cd-minicart-items">
-					<?php foreach ($block->getItems() as $item): ?>
+					<!-- ko foreach: getCartItems() -->
 						<div class="cd-product-item">
 							<div class="cd-product-image">
-								<?php $productImageUrl = $block->getItemProductImageUrl($item); ?>
-								<a href="<?= $block->escapeUrl($item->getProduct()->getProductUrl()) ?>">
-									<img src="<?= $block->escapeUrl($productImageUrl) ?>" 
-										 alt="<?= $block->escapeHtml($item->getName()) ?>">
+								<!-- ko if: product_has_url -->
+								<a data-bind="attr: { href: product_url }">
+									<img data-bind="attr: { src: product_image.src, alt: product_image.alt }" />
 								</a>
+								<!-- /ko -->
+								<!-- ko ifnot: product_has_url -->
+								<span>
+									<img data-bind="attr: { src: product_image.src, alt: product_image.alt }" />
+								</span>
+								<!-- /ko -->
 							</div>
+							
 							<div class="cd-product-details">
 								<div class="cd-product-name">
-									<a href="<?= $block->escapeUrl($item->getProduct()->getProductUrl()) ?>">
-										<?= $block->escapeHtml($item->getName()) ?>
-									</a>
+									<!-- ko if: product_has_url -->
+									<a data-bind="attr: { href: product_url }, text: product_name"></a>
+									<!-- /ko -->
+									<!-- ko ifnot: product_has_url -->
+									<span data-bind="text: product_name"></span>
+									<!-- /ko -->
 								</div>
+								
 								<div class="cd-product-price">
-									<?= $block->getItemPrice($item) ?>
+									<!-- ko if: canApplyMsrp -->
+									<div class="details-map">
+										<span class="label" data-bind="text: $t('Price')"></span>
+										<span class="value" data-bind="text: $t('See price before order confirmation.')"></span>
+									</div>
+									<!-- /ko -->
+									<!-- ko ifnot: canApplyMsrp -->
+									<span class="price" data-bind="html: product_price"></span>
+									<!-- /ko -->
 								</div>
+								
 								<div class="cd-product-qty">
-									Qty: <?= (int)$item->getQty() ?>
+									<!-- ko text: 'Qty: ' + qty --><!-- /ko -->
 								</div>
+								
 								<div class="product actions">
+									<!-- ko if: is_visible_in_site_visibility -->
+									<div class="primary">
+										<a data-bind="attr: {href: configure_url}" class="action edit">
+											<span data-bind="text: $t('Edit')"></span>
+										</a>
+									</div>
+									<!-- /ko -->
 									<div class="secondary">
-										<a href="#" 
-										   title="<?= $block->escapeHtmlAttr(__('Remove item')) ?>"
-										   class="action delete"
-										   data-post='<?= /* @noEscape */ $block->getDeletePostJson($item) ?>'>
-											<span><?= $block->escapeHtml(__('Remove')) ?></span>
+										<a href="#" data-bind="attr: {'data-cart-item': item_id}"
+										   class="action delete">
+											<span data-bind="text: $t('Remove')"></span>
 										</a>
 									</div>
 								</div>
 							</div>
 						</div>
-					<?php endforeach; ?>
+					<!-- /ko -->
 				</ol>
 			</div>
 		<!-- /ko -->
@@ -76,33 +101,31 @@
 		<!-- /ko -->
 	</div>
 	
+	<!-- ko if: getCartParam('summary_count') -->
 	<div class="cd-minicart-footer">
 		<div class="subtotal cd-minicart-subtotal">
 			<span class="label">
 				<!-- ko i18n: 'Subtotal' --><!-- /ko -->
 			</span>
 			<div class="amount price-container">
-				<span class="price-wrapper" data-bind="html: getCartParam('subtotal')"></span>
+				<span class="price-wrapper" data-bind="html: getCartParamUnsanitizedHtml('subtotal')"></span>
 			</div>
 		</div>
-	</div>
-	
-	<?php if ($block->getItems() && count($block->getItems())): ?>
-	<div class="cd-minicart-footer">
+		
 		<div class="cd-minicart-buttons">
-			<a class="cd-minicart-button cd-view-cart" href="<?= $block->getShoppingCartUrl() ?>">
+			<a class="cd-minicart-button cd-view-cart" data-bind="attr: {href: getCartParam('cart_url')}">
 				<span>View Trolley</span>
 			</a>
 			
 			<button id="top-cart-btn-checkout"
 					type="button"
 					class="cd-minicart-button cd-checkout"
-					data-mage-init='{"Magento_Checkout/js/proceed-to-checkout":{"checkoutUrl":"<?= $block->escapeJs($block->getCheckoutUrl()) ?>"}}'>
+					data-bind="attr: {title: $t('Checkout')}, click: closeMinicart">
 				<span>Checkout</span>
 			</button>
 		</div>
 	</div>
-	<?php endif; ?>
+	<!-- /ko -->
 </div>
 
 <script type="text/x-magento-init">
@@ -166,6 +189,9 @@
 					allowBodyScroll();
 				}
 			});
+			
+			// Debug - log the cart data structure
+			console.log('Cart data structure:', window.customerData ? window.customerData.get('cart')() : 'Not available');
 		});
 	});
 </script>

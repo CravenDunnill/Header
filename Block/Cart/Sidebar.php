@@ -124,7 +124,30 @@ class Sidebar extends Template
 	 */
 	public function getItemPrice($item)
 	{
-		return $this->pricingHelper->currency($item->getPrice(), true, false);
+		// Try different price attributes to ensure we get a value
+		$price = $item->getPrice();
+		
+		// If using row total is desired (price * qty), uncomment this:
+		// $price = $item->getRowTotal();
+		
+		// If price is still empty, try calculation price
+		if (empty($price)) {
+			$price = $item->getCalculationPrice();
+		}
+		
+		// If price is still empty, try product's final price
+		if (empty($price)) {
+			$productId = $item->getProduct()->getId();
+			try {
+				$product = $this->productRepository->getById($productId);
+				$price = $product->getFinalPrice();
+			} catch (\Exception $e) {
+				// Use default price if product can't be loaded
+			}
+		}
+		
+		// Format the price with the pricing helper
+		return $this->pricingHelper->currency($price, true, false);
 	}
 	
 	/**
@@ -149,16 +172,28 @@ class Sidebar extends Template
 				$baseImage = $product->getImage();
 				
 				if ($thumbnail && $thumbnail != 'no_selection') {
-					// Direct path to thumbnail
-					return $mediaUrl . 'catalog/product' . $thumbnail;
+					// Direct path to thumbnail - ensure leading slash
+					$thumbnailPath = $thumbnail;
+					if (substr($thumbnailPath, 0, 1) !== '/') {
+						$thumbnailPath = '/' . $thumbnailPath;
+					}
+					return $mediaUrl . 'catalog/product' . $thumbnailPath;
 				} 
 				elseif ($smallImage && $smallImage != 'no_selection') {
-					// Fall back to small image
-					return $mediaUrl . 'catalog/product' . $smallImage;
+					// Fall back to small image - ensure leading slash
+					$smallImagePath = $smallImage;
+					if (substr($smallImagePath, 0, 1) !== '/') {
+						$smallImagePath = '/' . $smallImagePath;
+					}
+					return $mediaUrl . 'catalog/product' . $smallImagePath;
 				}
 				elseif ($baseImage && $baseImage != 'no_selection') {
-					// Fall back to base image 
-					return $mediaUrl . 'catalog/product' . $baseImage;
+					// Fall back to base image - ensure leading slash
+					$baseImagePath = $baseImage;
+					if (substr($baseImagePath, 0, 1) !== '/') {
+						$baseImagePath = '/' . $baseImagePath;
+					}
+					return $mediaUrl . 'catalog/product' . $baseImagePath;
 				}
 				else {
 					// No image available, use placeholder

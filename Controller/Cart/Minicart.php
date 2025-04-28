@@ -121,17 +121,30 @@ class Minicart extends Action
 						$smallImage = $product->getSmallImage();
 						$baseImage = $product->getImage();
 						
+						$imageUrl = '';
 						if ($thumbnail && $thumbnail != 'no_selection') {
-							// Direct path to thumbnail
-							$imageUrl = $mediaUrl . 'catalog/product' . $thumbnail;
+							// Direct path to thumbnail - ensure leading slash
+							$thumbnailPath = $thumbnail;
+							if (substr($thumbnailPath, 0, 1) !== '/') {
+								$thumbnailPath = '/' . $thumbnailPath;
+							}
+							$imageUrl = $mediaUrl . 'catalog/product' . $thumbnailPath;
 						} 
 						elseif ($smallImage && $smallImage != 'no_selection') {
-							// Fall back to small image
-							$imageUrl = $mediaUrl . 'catalog/product' . $smallImage;
+							// Fall back to small image - ensure leading slash
+							$smallImagePath = $smallImage;
+							if (substr($smallImagePath, 0, 1) !== '/') {
+								$smallImagePath = '/' . $smallImagePath;
+							}
+							$imageUrl = $mediaUrl . 'catalog/product' . $smallImagePath;
 						}
 						elseif ($baseImage && $baseImage != 'no_selection') {
-							// Fall back to base image 
-							$imageUrl = $mediaUrl . 'catalog/product' . $baseImage;
+							// Fall back to base image - ensure leading slash
+							$baseImagePath = $baseImage;
+							if (substr($baseImagePath, 0, 1) !== '/') {
+								$baseImagePath = '/' . $baseImagePath;
+							}
+							$imageUrl = $mediaUrl . 'catalog/product' . $baseImagePath;
 						}
 						else {
 							// No image available, use placeholder
@@ -145,8 +158,15 @@ class Minicart extends Action
 					// Get product URL
 					$productUrl = $product->getProductUrl();
 					
-					// Format price properly
-					$price = $this->pricingHelper->currency($item->getPrice(), true, false);
+					// Format price properly - try to get several price types
+					$price = $item->getPrice();
+					if (empty($price)) {
+						$price = $item->getCalculationPrice();
+					}
+					if (empty($price)) {
+						$price = $product->getFinalPrice();
+					}
+					$formattedPrice = $this->pricingHelper->currency($price, true, false);
 					
 					// Build the item HTML
 					$html .= '<div class="cd-product-item">';
@@ -160,7 +180,7 @@ class Minicart extends Action
 					$html .= '<a href="' . $productUrl . '">' . $item->getName() . '</a>';
 					$html .= '</div>';
 					$html .= '<div class="cd-product-price">';
-					$html .= $price;
+					$html .= $formattedPrice;
 					$html .= '</div>';
 					$html .= '<div class="cd-product-qty">';
 					$html .= 'Qty: ' . (int)$item->getQty();
