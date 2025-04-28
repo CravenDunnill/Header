@@ -1,0 +1,171 @@
+<?php
+/**
+ * Copyright © Craven Dunnill. All rights reserved.
+ */
+
+/** @var $block \Magento\Checkout\Block\Cart\Sidebar */
+/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
+?>
+
+<div id="cd-minicart" class="cd-minicart" data-bind="scope: 'minicart_content'">
+	<div class="cd-minicart-header">
+		<h3>Your Trolley</h3>
+		<button type="button" class="cd-minicart-close" id="cd-minicart-close">
+			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<line x1="18" y1="6" x2="6" y2="18"></line>
+				<line x1="6" y1="6" x2="18" y2="18"></line>
+			</svg>
+		</button>
+	</div>
+	<div class="cd-minicart-content">
+		<!-- ko if: getCartParam('summary_count') -->
+			<div class="items-total" style="display: none;">
+				<span class="count" data-bind="text: getCartParam('summary_count')"></span>
+				<!-- ko if: (getCartParam('summary_count') > 1) -->
+					<span data-bind="i18n: 'Items in Trolley'"></span>
+				<!--/ko-->
+				<!-- ko if: (getCartParam('summary_count') == 1) -->
+					<span data-bind="i18n: 'Item in Trolley'"></span>
+				<!--/ko-->
+			</div>
+
+			<div data-action="scroll" class="minicart-items-wrapper">
+				<ol id="mini-cart" class="minicart-items cd-minicart-items">
+					<?php foreach ($block->getItems() as $item): ?>
+						<div class="cd-product-item">
+							<div class="cd-product-image">
+								<?php $productImageUrl = $block->getItemProductImageUrl($item); ?>
+								<a href="<?= $block->escapeUrl($item->getProduct()->getProductUrl()) ?>">
+									<img src="<?= $block->escapeUrl($productImageUrl) ?>" 
+										 alt="<?= $block->escapeHtml($item->getName()) ?>">
+								</a>
+							</div>
+							<div class="cd-product-details">
+								<div class="cd-product-name">
+									<a href="<?= $block->escapeUrl($item->getProduct()->getProductUrl()) ?>">
+										<?= $block->escapeHtml($item->getName()) ?>
+									</a>
+								</div>
+								<div class="cd-product-price">
+									<?= $block->getItemPrice($item) ?>
+								</div>
+								<div class="cd-product-qty">
+									Qty: <?= (int)$item->getQty() ?>
+								</div>
+								<div class="product actions">
+									<div class="secondary">
+										<a href="#" 
+										   title="<?= $block->escapeHtmlAttr(__('Remove item')) ?>"
+										   class="action delete"
+										   data-post='<?= /* @noEscape */ $block->getDeletePostJson($item) ?>'>
+											<span><?= $block->escapeHtml(__('Remove')) ?></span>
+										</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					<?php endforeach; ?>
+				</ol>
+			</div>
+		<!-- /ko -->
+
+		<!-- ko ifnot: getCartParam('summary_count') -->
+			<div class="cd-empty-cart">
+				<p data-bind="i18n: 'You have no items in your trolley.'"></p>
+			</div>
+		<!-- /ko -->
+	</div>
+	
+	<div class="cd-minicart-footer">
+		<div class="subtotal cd-minicart-subtotal">
+			<span class="label">
+				<!-- ko i18n: 'Subtotal' --><!-- /ko -->
+			</span>
+			<div class="amount price-container">
+				<span class="price-wrapper" data-bind="html: getCartParam('subtotal')"></span>
+			</div>
+		</div>
+	</div>
+	
+	<?php if ($block->getItems() && count($block->getItems())): ?>
+	<div class="cd-minicart-footer">
+		<div class="cd-minicart-buttons">
+			<a class="cd-minicart-button cd-view-cart" href="<?= $block->getShoppingCartUrl() ?>">
+				<span>View Trolley</span>
+			</a>
+			
+			<button id="top-cart-btn-checkout"
+					type="button"
+					class="cd-minicart-button cd-checkout"
+					data-mage-init='{"Magento_Checkout/js/proceed-to-checkout":{"checkoutUrl":"<?= $block->escapeJs($block->getCheckoutUrl()) ?>"}}'>
+				<span>Checkout</span>
+			</button>
+		</div>
+	</div>
+	<?php endif; ?>
+</div>
+
+<script type="text/x-magento-init">
+{
+	"#cd-minicart": {
+		"Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+	}
+}
+</script>
+
+<script>
+	require(['jquery'], function($) {
+		'use strict';
+
+		$(document).ready(function() {
+			// Function to prevent body scroll
+			function preventBodyScroll() {
+				var scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+				window.lastScrollPosition = scrollPosition;
+				document.documentElement.classList.add('scroll-locked');
+				document.body.classList.add('scroll-locked');
+				document.body.style.setProperty('top', `-${scrollPosition}px`, 'important');
+			}
+
+			// Function to allow body scroll
+			function allowBodyScroll() {
+				document.documentElement.classList.remove('scroll-locked');
+				document.body.classList.remove('scroll-locked');
+				document.body.style.removeProperty('overflow');
+				document.body.style.removeProperty('position');
+				document.body.style.removeProperty('height');
+				document.body.style.removeProperty('width');
+				document.body.style.removeProperty('top');
+				const scrollPosition = window.lastScrollPosition || 0;
+				window.scrollTo(0, scrollPosition);
+			}
+
+			// Close button
+			$('#cd-minicart-close').on('click', function(e) {
+				e.preventDefault();
+				$('#cd-minicart').removeClass('active');
+				$('#cd-overlay').css('display', 'none');
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+				allowBodyScroll();
+			});
+
+			// Overlay click
+			$('#cd-overlay').on('click', function() {
+				$('#cd-minicart').removeClass('active');
+				$(this).css('display', 'none');
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+				allowBodyScroll();
+			});
+
+			// Escape key handler
+			$(document).keyup(function(e) {
+				if (e.key === "Escape") {
+					$('#cd-minicart').removeClass('active');
+					$('#cd-overlay').hide();
+					$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+					allowBodyScroll();
+				}
+			});
+		});
+	});
+</script>

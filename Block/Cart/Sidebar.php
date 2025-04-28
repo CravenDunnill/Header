@@ -11,6 +11,8 @@ use Magento\Catalog\Model\ProductRepository;
 use Magento\Catalog\Helper\Image as ImageHelper;
 use Magento\Framework\Pricing\Helper\Data as PricingHelper;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\Data\Form\FormKey;
 
 class Sidebar extends Template
 {
@@ -40,6 +42,16 @@ class Sidebar extends Template
 	protected $storeManager;
 	
 	/**
+	 * @var Json
+	 */
+	protected $jsonSerializer;
+	
+	/**
+	 * @var FormKey
+	 */
+	protected $formKey;
+	
+	/**
 	 * Constructor
 	 *
 	 * @param Context $context
@@ -48,6 +60,8 @@ class Sidebar extends Template
 	 * @param ImageHelper $imageHelper
 	 * @param PricingHelper $pricingHelper
 	 * @param StoreManagerInterface $storeManager
+	 * @param Json $jsonSerializer
+	 * @param FormKey $formKey
 	 * @param array $data
 	 */
 	public function __construct(
@@ -57,6 +71,8 @@ class Sidebar extends Template
 		ImageHelper $imageHelper,
 		PricingHelper $pricingHelper,
 		StoreManagerInterface $storeManager,
+		Json $jsonSerializer,
+		FormKey $formKey,
 		array $data = []
 	) {
 		$this->checkoutSession = $checkoutSession;
@@ -64,6 +80,8 @@ class Sidebar extends Template
 		$this->imageHelper = $imageHelper;
 		$this->pricingHelper = $pricingHelper;
 		$this->storeManager = $storeManager;
+		$this->jsonSerializer = $jsonSerializer;
+		$this->formKey = $formKey;
 		parent::__construct($context, $data);
 	}
 	
@@ -153,6 +171,26 @@ class Sidebar extends Template
 		} catch (\Exception $e) {
 			return $this->imageHelper->getDefaultPlaceholderUrl('thumbnail');
 		}
+	}
+	
+	/**
+	 * Get delete post JSON for an item
+	 *
+	 * @param \Magento\Quote\Model\Quote\Item $item
+	 * @return string
+	 */
+	public function getDeletePostJson($item)
+	{
+		return $this->jsonSerializer->serialize([
+			'action' => $this->getUrl(
+				'checkout/sidebar/removeItem',
+				['item_id' => $item->getId()]
+			),
+			'data' => [
+				'item_id' => $item->getId(),
+				'form_key' => $this->formKey->getFormKey()
+			]
+		]);
 	}
 	
 	/**

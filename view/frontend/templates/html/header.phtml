@@ -39,7 +39,7 @@
 				<span>Account</span>
 			</a>
 			
-			<!-- Cart icon will be placed here by minicart.phtml -->
+			<!-- Cart icon will be placed here by cart-icons.phtml -->
 		</div>
 	</div>
 
@@ -81,7 +81,7 @@
 				</svg>
 			</a>
 			
-			<!-- Mobile cart icon will be placed here by minicart.phtml -->
+			<!-- Mobile cart icon will be placed here by cart-icons.phtml -->
 		</div>
 	</div>
 	
@@ -108,8 +108,11 @@
 		</div>
 	</div>
 	
-	<!-- Mini Cart - Now using direct template approach -->
-	<?= $block->getChildHtml('minicart_template') ?>
+	<!-- Cart Icons -->
+	<?= $block->getChildHtml('cart_icons') ?>
+	
+	<!-- Mini Cart -->
+	<?= $block->getChildHtml('minicart_content') ?>
 	
 	<!-- Mobile Menu Slide-out -->
 	<div class="cd-mobile-menu" id="cd-mobile-menu">
@@ -543,27 +546,6 @@
 					allowBodyScroll();
 				}
 			});
-			
-			// Move cart icons into the proper places in the header
-			function moveCartIcons() {
-				// Move desktop cart icon to header-right
-				var desktopCartIcon = $('#cd-cart-trigger');
-				if (desktopCartIcon.length && !$('.cd-header-right .cd-cart-trigger').length) {
-					desktopCartIcon.detach().appendTo('.cd-header-right');
-				}
-				
-				// Move mobile cart icon to header-mobile-right
-				var mobileCartIcon = $('#cd-cart-trigger-mobile');
-				if (mobileCartIcon.length && !$('.cd-header-mobile-right .cd-cart-trigger').length) {
-					mobileCartIcon.detach().appendTo('.cd-header-mobile-right');
-				}
-			}
-			
-			// Run on page load
-			moveCartIcons();
-			
-			// Also run after a slight delay to ensure DOM is ready
-			setTimeout(moveCartIcons, 100);
 		});
 	});
 	</script>

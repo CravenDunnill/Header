@@ -1,0 +1,79 @@
+<?php
+/**
+ * Copyright © Craven Dunnill. All rights reserved.
+ */
+?>
+<!-- Desktop Cart Icon -->
+<div class="cd-header-icon cd-cart-trigger" id="cd-cart-trigger">
+	<div class="cd-cart-icon-wrapper">
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+			<circle cx="9" cy="21" r="1"></circle>
+			<circle cx="20" cy="21" r="1"></circle>
+			<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+		</svg>
+		<span class="cd-cart-counter"></span>
+	</div>
+	<span>Trolley</span>
+</div>
+
+<!-- Mobile Cart Icon -->
+<div class="cd-header-icon-mobile cd-cart-trigger" id="cd-cart-trigger-mobile">
+	<div class="cd-cart-icon-wrapper">
+		<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+			<circle cx="9" cy="21" r="1"></circle>
+			<circle cx="20" cy="21" r="1"></circle>
+			<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+		</svg>
+		<span class="cd-cart-counter"></span>
+	</div>
+</div>
+
+<script type="text/x-magento-init">
+{
+	"*": {
+		"cravendunnill-cart-counter": {}
+	}
+}
+</script>
+
+<script>
+require(['jquery'], function($) {
+	'use strict';
+	
+	$(document).ready(function() {
+		// Cart trigger events
+		$('#cd-cart-trigger, #cd-cart-trigger-mobile').on('click', function(e) {
+			e.preventDefault();
+			$('#cd-minicart').addClass('active');
+			$('#cd-overlay').css('display', 'block');
+			$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
+			
+			// Prevent body scrolling
+			var scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+			window.lastScrollPosition = scrollPosition;
+			document.documentElement.classList.add('scroll-locked');
+			document.body.classList.add('scroll-locked');
+			document.body.style.setProperty('top', `-${scrollPosition}px`, 'important');
+		});
+		
+		// Move cart icons to their proper positions
+		function moveCartIcons() {
+			var desktopCartIcon = $('#cd-cart-trigger');
+			if (desktopCartIcon.length && !$('.cd-header-right .cd-cart-trigger').length) {
+				desktopCartIcon.detach().appendTo('.cd-header-right');
+			}
+			
+			var mobileCartIcon = $('#cd-cart-trigger-mobile');
+			if (mobileCartIcon.length && !$('.cd-header-mobile-right .cd-cart-trigger').length) {
+				mobileCartIcon.detach().appendTo('.cd-header-mobile-right');
+			}
+		}
+		
+		// Run immediately and after delays to ensure the icons are moved
+		moveCartIcons();
+		setTimeout(moveCartIcons, 100);
+		setTimeout(moveCartIcons, 500);
+		setTimeout(moveCartIcons, 1000);
+	});
+});
+</script>

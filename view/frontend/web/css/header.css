@@ -270,12 +270,6 @@ html, body {
 }
 
 /* Subtotal in footer */
-.cd-minicart-subtotal {
-	padding-bottom: 15px;
-	margin-bottom: 15px;
-	border-bottom: 1px solid #f0f0f0;
-	width: 100%;
-}
 
 .cd-minicart-subtotal .subtotal {
 	display: flex;
