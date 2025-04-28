@@ -5,6 +5,7 @@ var config = {
 		}
 	},
 	paths: {
-		'cravendunnill-cart-counter': 'CravenDunnill_Header/js/cart-counter'
+		'cravendunnill-cart-counter': 'CravenDunnill_Header/js/cart-counter',
+		'cravendunnill-minicart-delete': 'CravenDunnill_Header/js/minicart-delete'
 	}
 };

@@ -81,8 +81,10 @@
 									</div>
 									<!-- /ko -->
 									<div class="secondary">
-										<a href="#" data-bind="attr: {'data-cart-item': item_id}"
-										   class="action delete">
+										<a href="#"
+										   data-bind="attr: {'data-cart-item': item_id}"
+										   class="action delete"
+										   title="<?= $block->escapeHtmlAttr(__('Remove item')) ?>">
 											<span data-bind="text: $t('Remove')"></span>
 										</a>
 									</div>
@@ -113,16 +115,16 @@
 		</div>
 		
 		<div class="cd-minicart-buttons">
-			<a class="cd-minicart-button cd-view-cart" data-bind="attr: {href: getCartParam('cart_url')}">
+			<a class="cd-minicart-button cd-view-cart" href="<?= $block->escapeUrl($block->getUrl('checkout/cart')) ?>">
 				<span>View Trolley</span>
 			</a>
 			
-			<button id="top-cart-btn-checkout"
-					type="button"
-					class="cd-minicart-button cd-checkout"
-					data-bind="attr: {title: $t('Checkout')}, click: closeMinicart">
+			<a id="top-cart-btn-checkout"
+			   class="cd-minicart-button cd-checkout"
+			   href="<?= $block->escapeUrl($block->getUrl('checkout')) ?>"
+			   title="<?= $block->escapeHtmlAttr(__('Checkout')) ?>">
 				<span>Checkout</span>
-			</button>
+			</a>
 		</div>
 	</div>
 	<!-- /ko -->
@@ -132,6 +134,14 @@
 {
 	"#cd-minicart": {
 		"Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+	}
+}
+</script>
+
+<script type="text/x-magento-init">
+{
+	"*": {
+		"cravendunnill-minicart-delete": {}
 	}
 }
 </script>

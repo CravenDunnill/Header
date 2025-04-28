@@ -47,6 +47,7 @@
 											<a href="#" 
 											   title="<?= $block->escapeHtmlAttr(__('Remove item')) ?>"
 											   class="action delete"
+											   data-cart-item="<?= $block->escapeHtmlAttr($item->getId()) ?>"
 											   data-post='<?= /* @noEscape */ $block->getDeletePostJson($item) ?>'>
 												<span><?= $block->escapeHtml(__('Remove')) ?></span>
 											</a>
@@ -76,16 +77,24 @@
 		
 		<?php if ($block->getItems() && count($block->getItems())): ?>
 		<div class="cd-minicart-buttons">
-			<a href="<?= $block->escapeUrl($block->getShoppingCartUrl()) ?>" class="cd-minicart-button cd-view-cart">
-				View Cart
+			<a href="/checkout/cart" class="cd-minicart-button cd-view-cart">
+				View Trolley
 			</a>
-			<a href="<?= $block->escapeUrl($block->getCheckoutUrl()) ?>" class="cd-minicart-button cd-checkout">
+			<a href="/checkout" class="cd-minicart-button cd-checkout">
 				Checkout
 			</a>
 		</div>
 		<?php endif; ?>
 	</div>
 </div>
+
+<script type="text/x-magento-init">
+{
+	"*": {
+		"cravendunnill-minicart-delete": {}
+	}
+}
+</script>
 
 <script>
 require(['jquery', 'Magento_Customer/js/customer-data'], function($, customerData) {
