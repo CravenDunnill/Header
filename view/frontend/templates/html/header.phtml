@@ -114,6 +114,15 @@
 	<!-- Mini Cart -->
 	<?= $block->getChildHtml('minicart_content') ?>
 	
+	<!-- Add to cart handler initialization -->
+	<script type="text/x-magento-init">
+	{
+		"*": {
+			"cravendunnill-add-to-cart-override": {}
+		}
+	}
+	</script>
+	
 	<!-- Mobile Menu Slide-out -->
 	<div class="cd-mobile-menu" id="cd-mobile-menu">
 		<div class="cd-mobile-menu-header">

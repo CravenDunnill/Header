@@ -77,4 +77,84 @@
 	// Run periodically to catch any dynamic updates
 	setInterval(cleanTemplateText, 500);
 })();
+
+// Add direct event handlers for add to cart functionality
+(function() {
+	// Wait for document to be ready
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initCartHandlers);
+	} else {
+		initCartHandlers();
+	}
+	
+	function initCartHandlers() {
+		console.log('[CD-Inline] Setting up direct add-to-cart handlers');
+		
+		// Direct event handler for add to cart buttons
+		document.addEventListener('click', function(e) {
+			// Look for any element matching add to cart buttons
+			var button = e.target.closest('button.action.tocart');
+			if (button) {
+				console.log('[CD-Inline] Add to cart button clicked via direct handler');
+				
+				// Set a timeout to open the cart after Magento processing completes
+				setTimeout(function() {
+					openMiniCart();
+				}, 1000);
+			}
+		});
+		
+		// Function to forcibly open the minicart
+		window.openMiniCart = function() {
+			console.log('[CD-Inline] Opening minicart via direct method');
+			
+			var minicart = document.getElementById('cd-minicart');
+			var overlay = document.getElementById('cd-overlay');
+			
+			if (minicart) {
+				minicart.classList.add('active');
+				
+				// Also show overlay
+				if (overlay) {
+					overlay.style.display = 'block';
+				}
+				
+				// Apply blur
+				document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
+					if (el) el.style.filter = 'blur(4px)';
+				});
+				
+				// Lock scrolling
+				var scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+				window.lastScrollPosition = scrollPosition;
+				document.documentElement.classList.add('scroll-locked');
+				document.body.classList.add('scroll-locked');
+				document.body.style.top = '-' + scrollPosition + 'px';
+			}
+		};
+		
+		// Add XHR override to detect add to cart AJAX requests
+		var originalXHROpen = XMLHttpRequest.prototype.open;
+		XMLHttpRequest.prototype.open = function() {
+			var url = arguments[1];
+			
+			// Check if this is an add to cart request
+			if (typeof url === 'string' && url.indexOf('checkout/cart/add') > -1) {
+				console.log('[CD-Inline] Detected add to cart XHR: ' + url);
+				
+				// Set up load handler to check for success
+				this.addEventListener('load', function() {
+					if (this.status >= 200 && this.status < 300) {
+						console.log('[CD-Inline] Add to cart XHR completed successfully');
+						setTimeout(function() {
+							openMiniCart();
+						}, 500);
+					}
+				});
+			}
+			
+			return originalXHROpen.apply(this, arguments);
+		};
+	}
+})();
 </script>
