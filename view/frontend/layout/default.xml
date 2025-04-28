@@ -14,6 +14,7 @@
 		<!-- Wait for everything to be moved, then add our custom header at the end of header.container -->
 		<referenceContainer name="header.container">
 			<block class="CravenDunnill\Header\Block\Html\Header" name="custom.header" template="CravenDunnill_Header::html/header.phtml" after="-">
+				<block class="Magento\Checkout\Block\Cart\Sidebar" name="minicart_template" template="CravenDunnill_Header::html/minicart.phtml" />
 				<arguments>
 					<argument name="jsLayout" xsi:type="array">
 						<item name="components" xsi:type="array">

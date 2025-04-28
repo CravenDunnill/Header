@@ -611,14 +611,25 @@ body.scroll-locked {
 	/* The top value is set dynamically by JS */
 }
 
-/* Ensure mini-cart maintains the top: -40px even when body is fixed */
+/* Replace the fixed rule with these responsive rules */
+
+/* Desktop - keep top: -40px */
 body.scroll-locked .cd-minicart {
-	top: -40px !important;
-	height: 100dvh !important;
-	overflow-y: auto !important;
-	right: 0 !important;
+	top: -40px;
+	height: 100dvh;
+	overflow-y: auto;
+	right: 0;
 }
 
+/* Mobile - set top: 0 */
+@media screen and (max-width: 767px) {
+	body.scroll-locked .cd-minicart {
+		top: 0;
+		height: 100dvh;
+		overflow-y: auto;
+		right: 0;
+	}
+}
 /* Ensure content areas inside the minicart remain scrollable */
 body.scroll-locked .cd-minicart-content {
 	max-height: calc(100dvh - 195px) !important;
@@ -1093,7 +1104,7 @@ script[type="text/x-magento-init"],
 
 /* Ensure mobile menu remains scrollable when body is locked */
 body.scroll-locked .cd-mobile-menu {
-	top: -40px !important;
+	top: 0 !important;
 	height: 100dvh !important;
 	overflow-y: auto !important;
 	left: 0 !important;

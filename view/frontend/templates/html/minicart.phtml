@@ -1,0 +1,242 @@
+<?php
+/** @var $block \Magento\Checkout\Block\Cart\Sidebar */
+/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
+?>
+<div class="cd-minicart" id="cd-minicart">
+	<div class="cd-minicart-header">
+		<h3>Your Trolley</h3>
+		<button type="button" class="cd-minicart-close" id="cd-minicart-close">
+			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<line x1="18" y1="6" x2="6" y2="18"></line>
+				<line x1="6" y1="6" x2="18" y2="18"></line>
+			</svg>
+		</button>
+	</div>
+	<div class="cd-minicart-content">
+		<!-- Minicart content -->
+		<div class="block-content">
+			<?php if ($block->getItems() && count($block->getItems())): ?>
+				<div data-action="scroll" class="minicart-items-wrapper">
+					<ol id="mini-cart" class="minicart-items cd-minicart-items">
+						<?php foreach ($block->getItems() as $item): ?>
+							<?php
+							$productName = $item->getProduct()->getName();
+							$productPrice = $block->getItemPrice($item);
+							$productImageUrl = $block->getItemProductImageUrl($item);
+							$productUrl = $item->getProduct()->getProductUrl();
+							$qty = $item->getQty();
+							?>
+							<div class="cd-product-item">
+								<div class="cd-product-image">
+									<a href="<?= $block->escapeUrl($productUrl) ?>">
+										<img src="<?= $block->escapeUrl($productImageUrl) ?>" alt="<?= $block->escapeHtml($productName) ?>">
+									</a>
+								</div>
+								<div class="cd-product-details">
+									<div class="cd-product-name">
+										<a href="<?= $block->escapeUrl($productUrl) ?>"><?= $block->escapeHtml($productName) ?></a>
+									</div>
+									<div class="cd-product-price">
+										<?= $productPrice ?>
+									</div>
+									<div class="cd-product-qty">
+										Qty: <?= (int)$qty ?>
+									</div>
+								</div>
+							</div>
+						<?php endforeach; ?>
+					</ol>
+				</div>
+			<?php else: ?>
+				<div class="cd-empty-cart">
+					<p>You have no items in your trolley.</p>
+				</div>
+			<?php endif; ?>
+		</div>
+	</div>
+	
+	<!-- Mini Cart Footer -->
+	<div class="cd-minicart-footer">
+		<div class="cd-minicart-subtotal" id="cd-minicart-subtotal">
+			<div class="subtotal">
+				<span class="label">Subtotal</span>
+				<span class="price"><?= $block->getSubtotalHtml() ?></span>
+			</div>
+		</div>
+		
+		<div class="cd-minicart-buttons">
+			<a href="<?= $block->escapeUrl($block->getShoppingCartUrl()) ?>" class="cd-minicart-button cd-view-cart">
+				View Cart
+			</a>
+			<a href="<?= $block->escapeUrl($block->getCheckoutUrl()) ?>" class="cd-minicart-button cd-checkout">
+				Checkout
+			</a>
+		</div>
+	</div>
+</div>
+
+<!-- Desktop Cart Icon -->
+<div class="cd-header-icon cd-cart-trigger" id="cd-cart-trigger">
+	<div class="cd-cart-icon-wrapper">
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+			<circle cx="9" cy="21" r="1"></circle>
+			<circle cx="20" cy="21" r="1"></circle>
+			<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+		</svg>
+		<span class="cd-cart-counter" style="display:block;"></span>
+	</div>
+	<span>Trolley</span>
+</div>
+
+<!-- Mobile Cart Icon -->
+<div class="cd-header-icon-mobile cd-cart-trigger" id="cd-cart-trigger-mobile">
+	<div class="cd-cart-icon-wrapper">
+		<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+			<circle cx="9" cy="21" r="1"></circle>
+			<circle cx="20" cy="21" r="1"></circle>
+			<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+		</svg>
+		<span class="cd-cart-counter" style="display:block;"></span>
+	</div>
+</div>
+
+<style>
+/* Direct styling for the cart counter - explicitly overriding any other styles */
+.cd-cart-counter {
+	display: block !important;
+	position: absolute !important;
+	top: -5px !important;
+	right: -5px !important;
+	width: 12px !important;
+	height: 12px !important;
+	border-radius: 50% !important;
+	background-color: #DB804A !important;
+	z-index: 1201 !important;
+	font-size: 0 !important; /* Hide text content */
+}
+
+/* Fix positioning for cart icon wrapper */
+.cd-cart-icon-wrapper {
+	position: relative !important;
+	display: inline-flex !important;
+}
+
+/* Remove max-height from minicart items */
+.minicart-items-wrapper > .minicart-items,
+.minicart-items-wrapper .cd-minicart-items {
+	max-height: none !important;
+	overflow: visible !important;
+}
+</style>
+
+<script>
+require(['jquery', 'Magento_Customer/js/customer-data'], function($, customerData) {
+	'use strict';
+	
+	$(document).ready(function() {
+		// Function to prevent body scroll
+		function preventBodyScroll() {
+			var scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+			window.lastScrollPosition = scrollPosition;
+			document.documentElement.classList.add('scroll-locked');
+			document.body.classList.add('scroll-locked');
+			document.body.style.setProperty('top', `-${scrollPosition}px`, 'important');
+		}
+
+		// Function to allow body scroll
+		function allowBodyScroll() {
+			document.documentElement.classList.remove('scroll-locked');
+			document.body.classList.remove('scroll-locked');
+			document.body.style.removeProperty('overflow');
+			document.body.style.removeProperty('position');
+			document.body.style.removeProperty('height');
+			document.body.style.removeProperty('width');
+			document.body.style.removeProperty('top');
+			const scrollPosition = window.lastScrollPosition || 0;
+			window.scrollTo(0, scrollPosition);
+		}
+		
+		// Update cart counter visibility based on items count
+		function updateCartCounter() {
+			var cartData = customerData.get('cart');
+			if (cartData() && typeof cartData().summary_count !== 'undefined') {
+				var itemCount = parseInt(cartData().summary_count, 10);
+				if (itemCount > 0) {
+					$('.cd-cart-counter').css('display', 'block');
+				} else {
+					$('.cd-cart-counter').css('display', 'none');
+				}
+			}
+		}
+		
+		// Initialize counter
+		updateCartCounter();
+		
+		// Subscribe to cart changes
+		customerData.get('cart').subscribe(function() {
+			updateCartCounter();
+		});
+		
+		// Cart trigger events
+		$('#cd-cart-trigger, #cd-cart-trigger-mobile').on('click', function(e) {
+			e.preventDefault();
+			$('#cd-minicart').addClass('active');
+			$('#cd-overlay').css('display', 'block');
+			$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
+			preventBodyScroll();
+		});
+		
+		// Close button
+		$('#cd-minicart-close').on('click', function(e) {
+			e.preventDefault();
+			$('#cd-minicart').removeClass('active');
+			$('#cd-overlay').css('display', 'none');
+			$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+			allowBodyScroll();
+		});
+		
+		// Overlay click
+		$('#cd-overlay').on('click', function() {
+			$('#cd-minicart').removeClass('active');
+			$(this).css('display', 'none');
+			$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+			allowBodyScroll();
+		});
+		
+		// Escape key handler
+		$(document).keyup(function(e) {
+			if (e.key === "Escape") {
+				$('#cd-minicart').removeClass('active');
+				$('#cd-overlay').hide();
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+				allowBodyScroll();
+			}
+		});
+		
+		// Move cart icons to their proper positions
+		function moveCartIcons() {
+			var desktopCartIcon = $('#cd-cart-trigger');
+			if (desktopCartIcon.length && !$('.cd-header-right .cd-cart-trigger').length) {
+				desktopCartIcon.detach().appendTo('.cd-header-right');
+			}
+			
+			var mobileCartIcon = $('#cd-cart-trigger-mobile');
+			if (mobileCartIcon.length && !$('.cd-header-mobile-right .cd-cart-trigger').length) {
+				mobileCartIcon.detach().appendTo('.cd-header-mobile-right');
+			}
+		}
+		
+		// Run immediately and after a delay
+		moveCartIcons();
+		setTimeout(moveCartIcons, 100);
+		
+		// Force show counter after page load (if there are items)
+		setTimeout(function() {
+			var cartData = customerData.get('cart')();
+			if (cartData && cartData.summary_count > 0) {
+				$('.cd-cart-counter').attr('style', 'display: block !important');
+			}
+		}, 500);
+	});
+});
+</script>
