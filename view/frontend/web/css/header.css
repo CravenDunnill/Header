@@ -369,12 +369,10 @@ body.minicart-active .cd-overlay {
 .cd-header-mobile-left {
 	display: flex;
 	align-items: center;
+	flex: 1;
 }
 
-.cd-header-mobile-center {
-	display: flex;
-	align-items: center;
-}
+/* Removed cd-header-mobile-center styles since we're removing that div */
 
 .cd-menu-button {
 	margin-right: 15px;
@@ -386,6 +384,7 @@ body.minicart-active .cd-overlay {
 	display: flex;
 	align-items: center;
 	text-decoration: none;
+	margin-left: auto;
 }
 
 .cd-logo-mobile img {
@@ -394,6 +393,7 @@ body.minicart-active .cd-overlay {
 	width: auto;
 }
 
+/* Updated search button style - positioned between menu and logo */
 .cd-search-button-mobile {
 	display: flex;
 	align-items: center;
@@ -401,6 +401,7 @@ body.minicart-active .cd-overlay {
 	color: #122C58;
 	text-decoration: none;
 	font-weight: 200;
+	margin: 0 15px;
 }
 
 .cd-header-mobile-right {
