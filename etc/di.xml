@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-	<!-- Add preference for our cart sidebar block -->
-	<preference for="CravenDunnill\Header\Block\Cart\Sidebar" type="CravenDunnill\Header\Block\Cart\Sidebar" />
+	<!-- Replace Magento's default cart sidebar with our implementation -->
+	<preference for="Magento\Checkout\Block\Cart\Sidebar" type="CravenDunnill\Header\Block\Cart\Sidebar" />
 </config>
