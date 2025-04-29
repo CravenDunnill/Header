@@ -502,6 +502,11 @@ body.minicart-active .cd-overlay {
 	body.scroll-locked .cd-minicart {
 		top: 0 !important;
 	}
+	
+	/* Remove border-bottom from mobile header */
+	.cd-header-mobile {
+		border-bottom: none;
+	}
 }
 
 /* Critical CSS fixes for header visibility */
