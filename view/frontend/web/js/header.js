@@ -725,6 +725,30 @@ define([
 				allowBodyScroll();
 			});
 			
+			// Global click handler to close minicart when clicking outside
+			$(document).on('click', function(e) {
+				// Only process if minicart is open
+				if ($('#cd-minicart').hasClass('active')) {
+					// Check if click is outside the minicart
+					if (!$(e.target).closest('#cd-minicart').length && 
+						!$(e.target).closest('#cd-cart-trigger').length && 
+						!$(e.target).closest('#cd-cart-trigger-mobile').length) {
+						
+						console.log('Clicked outside minicart - closing');
+						
+						// Hide minicart
+						$('#cd-minicart').removeClass('active');
+						$('#cd-overlay').hide();
+						
+						// Remove blur from content
+						$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+						
+						// Allow body to scroll again
+						allowBodyScroll();
+					}
+				}
+			});
+			
 			// Mobile Menu Functionality 
 			$('#cd-menu-button').off('click').on('click', function(e) {
 				e.preventDefault();
@@ -1104,6 +1128,40 @@ define([
 						return false;
 					};
 				});
+				
+				// Add document-level click handler via direct DOM API
+				document.addEventListener('click', function(e) {
+					// Only process if minicart is open
+					var minicart = document.getElementById('cd-minicart');
+					if (minicart && minicart.classList.contains('active')) {
+						// Check if click is outside the minicart
+						var isClickInsideMinicart = minicart.contains(e.target);
+						
+						// Check if click is on cart trigger buttons
+						var cartTrigger = document.getElementById('cd-cart-trigger');
+						var cartTriggerMobile = document.getElementById('cd-cart-trigger-mobile');
+						var isClickOnTrigger = (cartTrigger && cartTrigger.contains(e.target)) || 
+										   (cartTriggerMobile && cartTriggerMobile.contains(e.target));
+						
+						if (!isClickInsideMinicart && !isClickOnTrigger) {
+							console.log('Direct DOM: Clicked outside minicart - closing');
+							
+							// Hide minicart
+							minicart.classList.remove('active');
+							
+							// Hide overlay
+							document.getElementById('cd-overlay').style.display = 'none';
+							
+							// Remove blur from content elements
+							document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
+								if (el) el.style.filter = 'none';
+							});
+							
+							// Allow body to scroll again
+							allowBodyScroll();
+						}
+					}
+				}, true); // Use capture phase for maximum reliability
 				
 				// Force a final cart refresh
 				setTimeout(function() {

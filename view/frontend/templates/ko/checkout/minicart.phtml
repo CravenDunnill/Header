@@ -201,6 +201,28 @@
 				}
 			});
 			
+			// Add document click handler to close minicart when clicking outside
+			$(document).on('click', function(e) {
+				// Only process if minicart is open
+				if ($('#cd-minicart').hasClass('active')) {
+					// Check if click is outside the minicart
+					if (!$(e.target).closest('#cd-minicart').length && 
+						!$(e.target).closest('#cd-cart-trigger').length && 
+						!$(e.target).closest('#cd-cart-trigger-mobile').length) {
+						
+						console.log('Clicked outside minicart - closing');
+						
+						// Hide minicart
+						$('#cd-minicart').removeClass('active');
+						$('#cd-overlay').css('display', 'none');
+						$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+						
+						// Allow body scroll
+						allowBodyScroll();
+					}
+				}
+			});
+			
 			// Debug - log the cart data structure
 			console.log('Cart data structure:', window.customerData ? window.customerData.get('cart')() : 'Not available');
 		});

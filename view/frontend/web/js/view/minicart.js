@@ -71,6 +71,21 @@ define([
 				window.scrollTo(0, scrollPosition);
 			};
 			
+			// Add document click handler to close minicart when clicking outside
+			$(document).on('click', function(e) {
+				// Check if minicart is active
+				if ($('#cd-minicart').hasClass('active')) {
+					// Check if click is outside the minicart
+					if (!$(e.target).closest('#cd-minicart').length && 
+						!$(e.target).closest('#cd-cart-trigger').length && 
+						!$(e.target).closest('#cd-cart-trigger-mobile').length) {
+						
+						// Call our close function
+						self.closeMinicart();
+					}
+				}
+			});
+			
 			return this;
 		},
 
