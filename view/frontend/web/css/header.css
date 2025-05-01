@@ -1110,7 +1110,7 @@ body.scroll-locked .cd-mobile-menu {
 }
 
 body.scroll-locked .cd-mobile-menu-content {
-	max-height: calc(100dvh - 265px) !important; /* Adjusted to account for footer */
+	max-height: calc(100dvh); /* Adjusted to account for footer */
 	overflow-y: auto !important;
 	-webkit-overflow-scrolling: touch !important;
 }
