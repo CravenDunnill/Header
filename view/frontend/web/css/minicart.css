@@ -175,7 +175,7 @@
 
 /* Mini Cart Footer Styles */
 .cd-minicart-footer {
-	padding: 15px 20px;
+	padding: 5px 20px;
 	border-top: 1px solid #eee;
 	background: #fff;
 	position: sticky;
@@ -243,6 +243,7 @@
 .cd-minicart-subtotal .label {
 	font-size: 16px;
 	color: #122C58;
+	font-weight: 200;
 }
 
 .price-container {
@@ -307,4 +308,9 @@
 	body.scroll-locked .cd-minicart {
 		top: 0 !important;
 	}
+}
+
+.minicart-items-wrapper > .minicart-items {
+	max-height: unset !important;
+	height: unset !important;
 }
