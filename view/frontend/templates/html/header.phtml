@@ -559,3 +559,171 @@
 	});
 	</script>
 </div>
+
+
+<!-- Emergency Mobile Cart Fix -->
+<style>
+@media screen and (max-width: 767px) {
+	/* Force minicart to display correctly */
+	.cd-minicart {
+		top: 0 !important;
+		right: -100vw !important;
+		width: 100vw !important;
+		height: 100vh !important;
+		position: fixed !important;
+		z-index: 99999 !important;
+		transition: none !important;
+		transform: none !important;
+		display: block !important;
+		background-color: #fff !important;
+	}
+	
+	.cd-minicart.active {
+		right: 0 !important;
+		opacity: 1 !important;
+		visibility: visible !important;
+	}
+	
+	/* Fix body scroll issues */
+	html.scroll-locked,
+	body.scroll-locked {
+		overflow: hidden !important;
+		height: 100% !important;
+		width: 100% !important;
+		position: fixed !important;
+	}
+	
+	/* Make content visible */
+	.cd-minicart-content {
+		display: block !important;
+		visibility: visible !important;
+		max-height: 70vh !important;
+	}
+}
+</style>
+
+<script>
+// Emergency Mobile Cart Fix
+(function() {
+	// Only run on mobile
+	if (window.innerWidth > 767) return;
+	
+	console.log("Mobile cart emergency fix active");
+	
+	// Define simple open minicart function
+	window.mobileOpenCart = function() {
+		console.log("Mobile: Opening cart");
+		
+		// Force display settings
+		document.getElementById('cd-minicart').style.display = 'block';
+		document.getElementById('cd-minicart').style.visibility = 'visible';
+		document.getElementById('cd-minicart').style.opacity = '1';
+		document.getElementById('cd-minicart').style.right = '0';
+		document.getElementById('cd-minicart').classList.add('active');
+		
+		// Show overlay
+		document.getElementById('cd-overlay').style.display = 'block';
+		
+		// Lock scrolling
+		document.documentElement.style.overflow = 'hidden';
+		document.body.style.overflow = 'hidden';
+		document.body.style.position = 'fixed';
+		document.body.style.width = '100%';
+		document.body.style.height = '100%';
+		
+		return false;
+	};
+	
+	// Override existing functions
+	window.forceOpenMinicart = window.mobileOpenCart;
+	
+	// Capture add to cart events
+	document.addEventListener('click', function(e) {
+		// Match add to cart buttons
+		if (e.target.matches('button.action.tocart') || 
+			e.target.closest('button.action.tocart')) {
+			console.log("Mobile: Detected add to cart click");
+			setTimeout(window.mobileOpenCart, 1000);
+		}
+	}, true);
+	
+	// Intercept AJAX cart requests
+	var origOpen = XMLHttpRequest.prototype.open;
+	XMLHttpRequest.prototype.open = function() {
+		this.addEventListener('load', function() {
+			if (this.responseURL && this.responseURL.indexOf('checkout/cart/add') > -1) {
+				console.log("Mobile: Detected cart AJAX success");
+				setTimeout(window.mobileOpenCart, 500);
+			}
+		});
+		origOpen.apply(this, arguments);
+	};
+})();
+</script>
+
+<!-- Mobile Cart Fix for Close Button -->
+<script>
+(function() {
+	// Only run on mobile
+	if (window.innerWidth > 767) return;
+	
+	console.log("Mobile cart close fix active");
+	
+	// Handle closing the cart
+	window.mobileCloseCart = function() {
+		console.log("Mobile: Closing cart");
+		
+		// Hide minicart
+		document.getElementById('cd-minicart').classList.remove('active');
+		document.getElementById('cd-minicart').style.right = '-100vw';
+		
+		// Hide overlay
+		document.getElementById('cd-overlay').style.display = 'none';
+		
+		// Unlock scrolling
+		document.documentElement.style.overflow = '';
+		document.documentElement.style.position = '';
+		document.documentElement.style.height = '';
+		document.documentElement.style.width = '';
+		
+		document.body.style.overflow = '';
+		document.body.style.position = '';
+		document.body.style.height = '';
+		document.body.style.width = '';
+		document.body.style.top = '';
+		
+		// Restore scroll position
+		var scrollY = parseInt(document.body.style.top || '0');
+		if (scrollY) {
+			window.scrollTo(0, Math.abs(scrollY));
+		}
+		
+		// Remove any other classes
+		document.documentElement.classList.remove('scroll-locked');
+		document.body.classList.remove('scroll-locked');
+		
+		return false;
+	};
+	
+	// Attach event handler to close button
+	document.addEventListener('click', function(e) {
+		if (e.target.matches('#cd-minicart-close') || 
+			e.target.closest('#cd-minicart-close')) {
+			return mobileCloseCart();
+		}
+		
+		// Also handle overlay clicks
+		if (e.target.matches('#cd-overlay')) {
+			return mobileCloseCart();
+		}
+	}, true);
+	
+	// Also override any existing close functions
+	var checkInterval = setInterval(function() {
+		if (document.getElementById('cd-minicart-close')) {
+			document.getElementById('cd-minicart-close').onclick = mobileCloseCart;
+			clearInterval(checkInterval);
+		}
+	}, 100);
+})();
+</script>

@@ -88,6 +88,8 @@ define([
 	window.forceOpenMinicart = function() {
 		console.log('[CD] Executing forceOpenMinicart function');
 		
+		var isMobile = window.innerWidth <= 767;
+		
 		// Refresh cart data from server first
 		customerData.reload(['cart'], true).done(function() {
 			console.log('[CD] Cart data reloaded, opening minicart...');
@@ -95,14 +97,31 @@ define([
 			// Forcefully apply all the effects
 			$('#cd-minicart').addClass('active');
 			$('#cd-overlay').css('display', 'block');
-			$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
 			
-			// Prevent body scrolling
+			// Only apply blur on desktop
+			if (!isMobile) {
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
+			}
+			
+			// Prevent body scrolling - simplified for mobile
 			var scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
 			window.lastScrollPosition = scrollPosition;
-			document.documentElement.classList.add('scroll-locked');
-			document.body.classList.add('scroll-locked');
-			document.body.style.setProperty('top', `-${scrollPosition}px`, 'important');
+			
+			if (isMobile) {
+				// Simple approach for mobile
+				$('html, body').css({
+					'overflow': 'hidden',
+					'position': 'fixed',
+					'width': '100%',
+					'height': '100%'
+				});
+				$('body').css('top', `-${scrollPosition}px`);
+			} else {
+				// Full approach for desktop
+				document.documentElement.classList.add('scroll-locked');
+				document.body.classList.add('scroll-locked');
+				document.body.style.setProperty('top', `-${scrollPosition}px`, 'important');
+			}
 			
 			// Update minicart content
 			refreshMinicartContent();

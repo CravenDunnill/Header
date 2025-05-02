@@ -11,21 +11,38 @@ define([
 		function openMinicart() {
 			console.log('Opening minicart...');
 			
+			var isMobile = window.innerWidth <= 767;
+			
 			// Make minicart visible
 			$('#cd-minicart').addClass('active');
 			
 			// Show overlay
 			$('#cd-overlay').css('display', 'block');
 			
-			// Apply blur effect to content
-			$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
+			// Apply blur effect to content (desktop only)
+			if (!isMobile) {
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
+			}
 			
 			// Prevent body scrolling
 			var scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
 			window.lastScrollPosition = scrollPosition;
-			document.documentElement.classList.add('scroll-locked');
-			document.body.classList.add('scroll-locked');
-			document.body.style.setProperty('top', `-${scrollPosition}px`, 'important');
+			
+			if (isMobile) {
+				// Simple approach for mobile
+				$('html, body').css({
+					'overflow': 'hidden',
+					'position': 'fixed',
+					'width': '100%',
+					'height': '100%'
+				});
+				$('body').css('top', `-${scrollPosition}px`);
+			} else {
+				// Full approach for desktop
+				document.documentElement.classList.add('scroll-locked');
+				document.body.classList.add('scroll-locked');
+				document.body.style.setProperty('top', `-${scrollPosition}px`, 'important');
+			}
 			
 			// Debug
 			console.log('Minicart should now be visible');
