@@ -857,6 +857,10 @@ body.scroll-locked .cd-search-panel-inner::-webkit-scrollbar-thumb {
 	overflow: visible !important;
 }
 
+.page.messages .message.shown {
+	height: 3rem !important;
+}
+
 /* Make sure message-wrapper containers are always visible */
 .message-wrapper,
 .message-success,
