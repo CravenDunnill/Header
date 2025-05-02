@@ -5,24 +5,6 @@ define([
 	'use strict';
 	
 	return function(config) {
-		// Function to update cart counter display
-		function updateCartCounter() {
-			var cartData = customerData.get('cart')();
-			if (cartData && cartData.summary_count > 0) {
-				$('.cd-cart-counter').text(cartData.summary_count).show();
-				
-				// Add animation class
-				$('.cd-cart-counter').addClass('updated');
-				
-				// Remove class after animation completes
-				setTimeout(function() {
-					$('.cd-cart-counter').removeClass('updated');
-				}, 500);
-			} else {
-				$('.cd-cart-counter').hide();
-			}
-		}
-		
 		// Function to open minicart
 		function openMinicart() {
 			$('#cd-minicart').addClass('active');
@@ -74,14 +56,6 @@ define([
 				}
 			});
 		}
-		
-		// Initial update
-		updateCartCounter();
-		
-		// Subscribe to cart changes
-		customerData.get('cart').subscribe(function() {
-			updateCartCounter();
-		});
 		
 		// Listen for add to cart events
 		$(document).on('ajax:addToCart', function() {

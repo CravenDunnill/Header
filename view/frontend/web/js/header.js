@@ -382,30 +382,28 @@ define([
 		}
 		
 		// Initialize cart counter
+		// Inside define block in header.js, replace the updateCartCounter function with:
 		function updateCartCounter() {
 			var cartData = customerData.get('cart');
 			
-			// Make sure we have valid cart data and a summary count
 			if (cartData() && typeof cartData().summary_count !== 'undefined') {
-				// Convert to integer to be sure
 				var summaryCount = parseInt(cartData().summary_count, 10);
 				
 				if (summaryCount > 0) {
-					// Show counter without text - just show the element
-					$('.cd-cart-counter').show();
-					// Add animation class
+					$('.cd-cart-counter').text(summaryCount);
+					$('.cd-cart-counter').removeClass('empty');
 					$('.cd-cart-counter').addClass('updated');
-					// Remove class after animation completes
+					
 					setTimeout(function() {
 						$('.cd-cart-counter').removeClass('updated');
 					}, 500);
 				} else {
-					// Hide counter when count is 0
-					$('.cd-cart-counter').hide();
+					$('.cd-cart-counter').addClass('empty');
+					$('.cd-cart-counter').text('');
 				}
 			} else {
-				// No valid cart data, hide counter
-				$('.cd-cart-counter').hide();
+				$('.cd-cart-counter').addClass('empty');
+				$('.cd-cart-counter').text('');
 			}
 		}
 		

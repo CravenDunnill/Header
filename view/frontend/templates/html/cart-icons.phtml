@@ -4,33 +4,43 @@
  */
 ?>
 <!-- Desktop Cart Icon -->
-<div class="cd-header-icon cd-cart-trigger" id="cd-cart-trigger">
+<div class="cd-header-icon cd-cart-trigger" id="cd-cart-trigger" data-bind="scope: 'minicart_content'">
 	<div class="cd-cart-icon-wrapper">
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
 			<circle cx="9" cy="21" r="1"></circle>
 			<circle cx="20" cy="21" r="1"></circle>
 			<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
 		</svg>
-		<span class="cd-cart-counter"></span>
+		<span class="cd-cart-counter" data-bind="text: getCartParam('summary_count'), css: {'empty': !getCartParam('summary_count')}"></span>
 	</div>
 	<span>Trolley</span>
 </div>
 
 <!-- Mobile Cart Icon -->
-<div class="cd-header-icon-mobile cd-cart-trigger" id="cd-cart-trigger-mobile">
+<div class="cd-header-icon-mobile cd-cart-trigger" id="cd-cart-trigger-mobile" data-bind="scope: 'minicart_content'">
 	<div class="cd-cart-icon-wrapper">
 		<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
 			<circle cx="9" cy="21" r="1"></circle>
 			<circle cx="20" cy="21" r="1"></circle>
 			<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
 		</svg>
-		<span class="cd-cart-counter"></span>
+		<span class="cd-cart-counter" data-bind="css: {'empty': !getCartParam('summary_count')}"></span>
 	</div>
 </div>
 
 <script type="text/x-magento-init">
 {
+	"[data-block='minicart']": {
+		"Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+	},
 	"*": {
+		"Magento_Ui/js/core/app": {
+			"components": {
+				"minicart_content": {
+					"component": "CravenDunnill_Header/js/view/minicart"
+				}
+			}
+		},
 		"cravendunnill-cart-counter": {}
 	}
 }

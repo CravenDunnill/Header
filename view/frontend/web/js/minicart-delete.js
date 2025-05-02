@@ -149,26 +149,6 @@ define([
 		
 		// Update cart visuals after deletion
 		function updateCartAfterDelete() {
-			// Get updated cart data
-			var cartData = customerData.get('cart')();
-			
-			// Update cart counter
-			if (cartData && cartData.summary_count > 0) {
-				$('.cd-cart-counter').text(cartData.summary_count).show();
-			} else {
-				$('.cd-cart-counter').hide();
-				
-				// If cart is empty, update minicart content
-				$('.cd-minicart-items').html(
-					'<div class="cd-empty-cart">' +
-					'<p>You have no items in your trolley.</p>' +
-					'</div>'
-				);
-				
-				// Hide checkout buttons
-				$('.cd-minicart-buttons').hide();
-			}
-			
 			// Refresh minicart content via AJAX
 			$.ajax({
 				url: '/cravendunnill_header/cart/minicart',

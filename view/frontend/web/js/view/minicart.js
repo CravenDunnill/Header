@@ -35,15 +35,12 @@ define([
 				self.cartData = updatedCart;
 				self.cartItems(self.getCartItems());
 				
-				// Update cart counter
-				if (updatedCart && updatedCart.summary_count) {
-					$('.cd-cart-counter').show();
+				// Update cart counter animation
+				if (updatedCart && updatedCart.summary_count > 0) {
 					$('.cd-cart-counter').addClass('updated');
 					setTimeout(function() {
 						$('.cd-cart-counter').removeClass('updated');
 					}, 500);
-				} else {
-					$('.cd-cart-counter').hide();
 				}
 			});
 			
