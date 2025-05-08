@@ -6,6 +6,33 @@ define([
 	'use strict';
 	
 	return function(config) {
+		// Function to ensure stable header positioning - early call
+		function ensureStableHeaderPositioning() {
+			// Pre-ensure header elements have stable dimensions
+			$('.cd-header-right, .cd-header-mobile-right').css({
+				'min-height': '40px',
+				'position': 'relative'
+			});
+			
+			// If cart icons are already in their correct containers, make them visible
+			if ($('.cd-header-right #cd-cart-trigger').length) {
+				$('#cd-cart-trigger').css({
+					'opacity': '1',
+					'visibility': 'visible'
+				});
+			}
+			
+			if ($('.cd-header-mobile-right #cd-cart-trigger-mobile').length) {
+				$('#cd-cart-trigger-mobile').css({
+					'opacity': '1',
+					'visibility': 'visible'
+				});
+			}
+		}
+		
+		// Call this function immediately for maximum effectiveness
+		ensureStableHeaderPositioning();
+		
 		// Function to ensure minicart is at the page level, not inside header
 		function ensureMinicartPosition() {
 			var $minicart = $('#cd-minicart');

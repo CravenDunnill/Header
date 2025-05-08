@@ -4,6 +4,15 @@
  */
 ?>
 <!-- Desktop Cart Icon -->
+<style>
+/* Initially hide cart icons until positioned correctly */
+#cd-cart-trigger, #cd-cart-trigger-mobile {
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.2s ease;
+}
+</style>
+
 <div class="cd-header-icon cd-cart-trigger" id="cd-cart-trigger" data-bind="scope: 'minicart_content'">
 	<div class="cd-cart-icon-wrapper">
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -66,7 +75,7 @@ require(['jquery'], function($) {
 			document.body.style.setProperty('top', `-${scrollPosition}px`, 'important');
 		});
 		
-		// Move cart icons to their proper positions
+		// Improved cart icons positioning function
 		function moveCartIcons() {
 			var desktopCartIcon = $('#cd-cart-trigger');
 			if (desktopCartIcon.length && !$('.cd-header-right .cd-cart-trigger').length) {
@@ -77,6 +86,12 @@ require(['jquery'], function($) {
 			if (mobileCartIcon.length && !$('.cd-header-mobile-right .cd-cart-trigger').length) {
 				mobileCartIcon.detach().appendTo('.cd-header-mobile-right');
 			}
+			
+			// Make the icons visible after they're moved to their correct positions
+			$('#cd-cart-trigger, #cd-cart-trigger-mobile').css({
+				'opacity': '1',
+				'visibility': 'visible'
+			});
 		}
 		
 		// Run immediately and after delays to ensure the icons are moved

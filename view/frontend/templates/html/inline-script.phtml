@@ -9,6 +9,26 @@
 <script type="text/javascript">
 // Inline script to clean up template text but preserve messages
 (function() {
+	// Immediate pre-positioning of cart icons containers
+	function prePositionHeaderContainers() {
+		// Pre-set dimensions for header containers to prevent layout shifts
+		var headerRight = document.querySelector('.cd-header-right');
+		var mobileHeaderRight = document.querySelector('.cd-header-mobile-right');
+		
+		if (headerRight) {
+			headerRight.style.minHeight = '40px';
+			headerRight.style.position = 'relative';
+		}
+		
+		if (mobileHeaderRight) {
+			mobileHeaderRight.style.minHeight = '40px';
+			mobileHeaderRight.style.position = 'relative';
+		}
+	}
+	
+	// Run this function instantly
+	prePositionHeaderContainers();
+
 	// Function to selectively clean text nodes
 	function cleanTemplateText() {
 		var walkDOM = function(node) {

@@ -63,3 +63,26 @@ body.scroll-locked {
 	touch-action: none !important;
 	overscroll-behavior: none !important;
 }
+
+/* Pre-reserve space for header icons to prevent layout shifts */
+.cd-header-right,
+.cd-header-mobile-right {
+	min-height: 40px;
+	position: relative;
+}
+
+/* Pre-positions for cart icons to prevent jumps */
+#cd-cart-trigger, 
+#cd-cart-trigger-mobile {
+	opacity: 0;
+	visibility: hidden;
+	position: relative;
+	transition: opacity 0.2s ease;
+}
+
+/* When positioned, make them visible */
+.cd-header-right #cd-cart-trigger,
+.cd-header-mobile-right #cd-cart-trigger-mobile {
+	opacity: 1;
+	visibility: visible;
+}
