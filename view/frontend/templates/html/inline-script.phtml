@@ -69,13 +69,85 @@
 		}
 	}
 	
+	// CRITICAL: Make sure minicart is positioned correctly as early as possible
+	function ensureMinicartPosition() {
+		// Wait for a tiny delay to ensure DOM elements are available
+		setTimeout(function() {
+			// Move minicart to body level if it exists
+			var minicart = document.getElementById('cd-minicart');
+			if (minicart) {
+				// Check if it's inside the header
+				var isInHeader = false;
+				var parent = minicart.parentNode;
+				while (parent && parent !== document.body) {
+					if (parent.classList && (
+						parent.classList.contains('cd-header-container') || 
+						parent.classList.contains('page-header') ||
+						parent.classList.contains('header-container')
+					)) {
+						isInHeader = true;
+						break;
+					}
+					parent = parent.parentNode;
+				}
+				
+				// If in header, move it out to body
+				if (isInHeader) {
+					console.log('[Early Load] Moving minicart out of header to body level');
+					document.body.appendChild(minicart);
+					
+					// Ensure proper styling
+					minicart.style.position = 'fixed';
+					minicart.style.top = '0';
+					minicart.style.right = '-450px';
+					minicart.style.zIndex = '9999';
+					minicart.style.height = '100vh';
+				}
+			}
+			
+			// Also check for overlay
+			var overlay = document.getElementById('cd-overlay');
+			if (overlay) {
+				var pageMain = document.querySelector('.page-main');
+				if (pageMain && !pageMain.contains(overlay)) {
+					console.log('[Early Load] Moving overlay to page-main');
+					pageMain.insertBefore(overlay, pageMain.firstChild);
+					
+					// Fix positioning
+					overlay.style.position = 'absolute';
+					overlay.style.top = '0';
+					overlay.style.left = '0';
+					overlay.style.right = '0';
+					overlay.style.bottom = '0';
+					overlay.style.zIndex = '100';
+				}
+			}
+		}, 10); // Very small delay to ensure elements are in DOM
+	}
+	
 	// Run when DOM is ready
 	document.addEventListener('DOMContentLoaded', function() {
 		cleanTemplateText();
+		ensureMinicartPosition();
 	});
 	
 	// Run periodically to catch any dynamic updates
 	setInterval(cleanTemplateText, 500);
+	
+	// Run as soon as this script executes
+	ensureMinicartPosition();
+	
+	// And also run shortly after window load
+	window.addEventListener('load', function() {
+		ensureMinicartPosition();
+		setTimeout(ensureMinicartPosition, 500);
+	});
+	
+	// Run when resources are loaded
+	if (document.readyState === 'complete' || document.readyState === 'interactive') {
+		// Document already ready, run immediately
+		ensureMinicartPosition();
+	}
 })();
 
 // Add direct event handlers for add to cart functionality
@@ -111,26 +183,37 @@
 			var minicart = document.getElementById('cd-minicart');
 			var overlay = document.getElementById('cd-overlay');
 			
-			if (minicart) {
-				minicart.classList.add('active');
-				
-				// Also show overlay
-				if (overlay) {
-					overlay.style.display = 'block';
+			// Get current scroll position
+			var currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+			window.lastScrollPosition = currentScrollPosition;
+			
+			// Scroll to top before opening the minicart
+			window.scrollTo({
+				top: 0,
+				behavior: 'smooth'
+			});
+			
+			// Slight delay to allow scroll to complete
+			setTimeout(function() {
+				if (minicart) {
+					minicart.classList.add('active');
+					
+					// Also show overlay
+					if (overlay) {
+						overlay.style.display = 'block';
+					}
+					
+					// Apply blur
+					document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
+						if (el) el.style.filter = 'blur(4px)';
+					});
+					
+					// Lock scrolling
+					document.documentElement.classList.add('scroll-locked');
+					document.body.classList.add('scroll-locked');
+					document.body.style.top = '0px'; // Set to 0 since we're at the top
 				}
-				
-				// Apply blur
-				document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
-					if (el) el.style.filter = 'blur(4px)';
-				});
-				
-				// Lock scrolling
-				var scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-				window.lastScrollPosition = scrollPosition;
-				document.documentElement.classList.add('scroll-locked');
-				document.body.classList.add('scroll-locked');
-				document.body.style.top = '-' + scrollPosition + 'px';
-			}
+			}, 300);
 		};
 		
 		// Add XHR override to detect add to cart AJAX requests

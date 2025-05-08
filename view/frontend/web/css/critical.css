@@ -1,0 +1,65 @@
+/* Critical CSS for minicart positioning */
+.cd-minicart {
+	position: fixed !important;
+	top: 0 !important;
+	right: -450px !important;
+	width: 400px !important;
+	max-width: 90% !important;
+	height: 100vh !important;
+	background: #fff !important;
+	box-shadow: -5px 0 15px rgba(0,0,0,0.1) !important;
+	transition: right 0.3s ease, visibility 0.3s ease, opacity 0.3s ease !important;
+	z-index: 9999 !important;
+	display: flex !important;
+	flex-direction: column !important;
+	overflow: hidden !important;
+	visibility: hidden !important;
+	opacity: 0 !important;
+}
+
+.cd-minicart.active {
+	right: 0 !important;
+	visibility: visible !important;
+	opacity: 1 !important;
+}
+
+@media screen and (max-width: 767px) {
+	.cd-minicart {
+		width: 100% !important;
+		max-width: 100% !important;
+		right: -100% !important;
+	}
+}
+
+/* Fixed header positioning */
+.page-header,
+header.page-header,
+.cd-header-container {
+	position: relative;
+	z-index: 1200 !important;
+}
+
+/* Fixed overlay positioning */
+.cd-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0,0,0,0.5);
+	z-index: 100;
+	display: none;
+}
+
+/* Scrolling behavior */
+html.scroll-locked,
+body.scroll-locked {
+	overflow: hidden !important;
+	position: fixed !important;
+	width: 100% !important;
+	height: 100% !important;
+	max-height: 100% !important;
+	max-width: 100vw !important;
+	touch-action: none !important;
+	overscroll-behavior: none !important;
+}

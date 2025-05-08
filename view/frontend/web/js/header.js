@@ -6,6 +6,63 @@ define([
 	'use strict';
 	
 	return function(config) {
+		// Function to ensure minicart is at the page level, not inside header
+		function ensureMinicartPosition() {
+			var $minicart = $('#cd-minicart');
+			
+			// If minicart exists but is inside header-container, move it out
+			if ($minicart.length) {
+				// Regardless of where it is, move it to body level for consistency
+				console.log('Moving minicart to body level for consistent positioning');
+				$minicart.detach().appendTo('body');
+				
+				// Ensure proper styling - IMPORTANT: Keep top at 0 for proper alignment
+				$minicart.css({
+					'position': 'fixed',
+					'top': '0',
+					'right': '-450px',
+					'z-index': '9999',
+					'height': '100vh',
+					'max-width': '90%'
+				});
+				
+				// Mobile-specific adjustments
+				if (window.innerWidth <= 767) {
+					$minicart.css({
+						'width': '100%',
+						'max-width': '100%',
+						'right': '-100%'
+					});
+				} else {
+					$minicart.css({
+						'width': '400px'
+					});
+				}
+			}
+			
+			// Also ensure overlay is properly positioned
+			var $overlay = $('#cd-overlay');
+			if ($overlay.length) {
+				var $pageMain = $('.page-main');
+				if ($pageMain.length) {
+					$overlay.detach().prependTo($pageMain);
+					
+					// Fix positioning
+					$overlay.css({
+						'position': 'absolute',
+						'top': '0',
+						'left': '0',
+						'right': '0',
+						'bottom': '0',
+						'z-index': '100'
+					});
+				}
+			}
+		}
+		
+		// Call this function FIRST before anything else
+		ensureMinicartPosition();
+		
 		// Calculate and store scrollbar width on load
 		var calculateScrollbarWidth = function() {
 			// Create a temporary div with scrollbar
@@ -153,7 +210,7 @@ define([
 				}
 				
 				body.scroll-locked .cd-minicart {
-					top: -40px !important;
+					top: 0px !important;
 					height: 100vh !important;
 					overflow-y: auto !important;
 				}
@@ -230,23 +287,25 @@ define([
 				document.removeEventListener('touchmove', window.scrollLockTouchmoveHandler, { passive: false });
 			}
 			
-			// Restore scroll position
-			const scrollPosition = window.lastScrollPosition || 0;
-			
-			// Use multiple methods to ensure scroll position is restored
-			setTimeout(function() {
-				window.scrollTo(0, scrollPosition);
-				if (scrollPosition > 0) {
-					$(window).scrollTop(scrollPosition);
-					document.documentElement.scrollTop = scrollPosition;
-					document.body.scrollTop = scrollPosition;
-					
-					// One more attempt with a tiny delay
-					setTimeout(function() {
-						window.scrollTo(0, scrollPosition);
-					}, 10);
-				}
-			}, 0);
+			// Only restore scroll position if we're NOT opening the minicart
+			if (!$('#cd-minicart').hasClass('active')) {
+				const scrollPosition = window.lastScrollPosition || 0;
+				
+				// Use multiple methods to ensure scroll position is restored
+				setTimeout(function() {
+					window.scrollTo(0, scrollPosition);
+					if (scrollPosition > 0) {
+						$(window).scrollTop(scrollPosition);
+						document.documentElement.scrollTop = scrollPosition;
+						document.body.scrollTop = scrollPosition;
+						
+						// One more attempt with a tiny delay
+						setTimeout(function() {
+							window.scrollTo(0, scrollPosition);
+						}, 10);
+					}
+				}, 0);
+			}
 		}
 		
 		// Critical fix: Move the overlay to a position that won't cover the header
@@ -539,6 +598,9 @@ define([
 		// Apply before document ready for maximum effectiveness
 		fixOverlayPosition();
 		
+		// Call minicart position function again after a short delay
+		setTimeout(ensureMinicartPosition, 50);
+		
 		// Execute immediately - don't wait for document ready
 		$('.page-header, header.page-header, .cd-header-container, .cd-header-desktop, .cd-header-mobile').addClass('no-blur');
 		
@@ -552,10 +614,29 @@ define([
 		setTimeout(removeTemplateText, 100);
 		setTimeout(removeTemplateText, 500);
 		setTimeout(removeTemplateText, 1500);
+		
+		// Run the minicart positioning function after delays
+		setTimeout(ensureMinicartPosition, 100);
+		setTimeout(ensureMinicartPosition, 500);
+		setTimeout(ensureMinicartPosition, 1000);
 
 		// Run on mutation events to catch dynamically added content
 		var observer = new MutationObserver(function(mutations) {
 			removeTemplateText();
+			
+			// Check for minicart being added to DOM
+			mutations.forEach(function(mutation) {
+				if (mutation.type === 'childList' && mutation.addedNodes.length) {
+					for (var i = 0; i < mutation.addedNodes.length; i++) {
+						if (mutation.addedNodes[i].id === 'cd-minicart' || 
+							(mutation.addedNodes[i].nodeType === 1 && mutation.addedNodes[i].querySelector('#cd-minicart'))) {
+							console.log('[Observer] Detected minicart addition to DOM');
+							setTimeout(ensureMinicartPosition, 10);
+							break;
+						}
+					}
+				}
+			});
 		});
 
 		if (document.body) {
@@ -580,6 +661,9 @@ define([
 			
 			// Run the fix for unprocessed message templates
 			removeTemplateText();
+			
+			// Ensure minicart position
+			ensureMinicartPosition();
 			
 			// Setup cart data subscription with direct DOM updates
 			var cartData = customerData.get('cart');
@@ -674,6 +758,9 @@ define([
 				e.preventDefault();
 				e.stopPropagation();
 				
+				// Ensure proper positioning of minicart before showing it
+				ensureMinicartPosition();
+				
 				// Try the overlay fix again when opening minicart
 				fixOverlayPosition();
 				
@@ -693,21 +780,34 @@ define([
 					// Allow body to scroll again
 					allowBodyScroll();
 				} else {
-					// Prevent body scrolling
-					preventBodyScroll();
+					// Get current scroll position for later restoration
+					var currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+					window.lastScrollPosition = currentScrollPosition;
 					
-					// Show minicart
-					$('#cd-minicart').addClass('active');
-					$('#cd-overlay').show();
-					
-					// Apply blur to content areas
-					$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
-					
-					// Ensure header is not blurred
-					$('.page-header, header.page-header, .cd-header-container').css({
-						'filter': 'none',
-						'z-index': '1200'
+					// Scroll to top before opening the minicart
+					window.scrollTo({
+						top: 0,
+						behavior: 'smooth'
 					});
+					
+					// Wait a short time for the scroll to complete before showing minicart
+					setTimeout(function() {
+						// Prevent body scrolling
+						preventBodyScroll();
+						
+						// Show minicart
+						$('#cd-minicart').addClass('active');
+						$('#cd-overlay').show();
+						
+						// Apply blur to content areas
+						$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
+						
+						// Ensure header is not blurred
+						$('.page-header, header.page-header, .cd-header-container').css({
+							'filter': 'none',
+							'z-index': '1200'
+						});
+					}, 300); // Adjust this delay based on how fast you want the scroll to be
 				}
 			});
 			
@@ -861,6 +961,7 @@ define([
 				setTimeout(function() {
 					customerData.reload(['cart'], true);
 					refreshMiniCartContent();
+					ensureMinicartPosition(); // Re-check positioning
 				}, 500);
 			});
 			
@@ -875,6 +976,9 @@ define([
 				// Only refresh the cart data without showing our custom message
 				customerData.reload(['cart'], true);
 				refreshMiniCartContent();
+				
+				// Make sure minicart is positioned correctly
+				ensureMinicartPosition();
 			});
 			
 			// Additional direct event listener for add to cart button
@@ -887,6 +991,7 @@ define([
 					customerData.reload(['cart'], true);
 					refreshMiniCartContent();
 					removeTemplateText();
+					ensureMinicartPosition(); // Re-check positioning
 				}, 1000);
 			});
 			
@@ -904,11 +1009,13 @@ define([
 					setTimeout(function() {
 						customerData.reload(['cart'], true);
 						refreshMiniCartContent();
+						ensureMinicartPosition(); // Re-check positioning
 					}, 500);
 				} else if (settings.url.indexOf('customer/section/load') !== -1) {
 					// Cart section update detected
 					console.log('Cart section update detected');
 					refreshMiniCartContent();
+					ensureMinicartPosition(); // Re-check positioning
 				}
 				
 				// Always check for template text after AJAX
@@ -923,6 +1030,7 @@ define([
 				// Update the minicart content
 				setTimeout(function() {
 					refreshMiniCartContent();
+					ensureMinicartPosition(); // Re-check positioning
 				}, 500);
 			});
 			
@@ -932,6 +1040,7 @@ define([
 				customerData.invalidate(['cart']);
 				customerData.reload(['cart'], true);
 				refreshMiniCartContent(true);
+				ensureMinicartPosition(); // Re-check positioning
 				return 'Cart reset initiated';
 			};
 			
@@ -974,6 +1083,9 @@ define([
 			$(window).on('load', function() {
 				// Recalculate scrollbar width on window load
 				calculateScrollbarWidth();
+				
+				// Ensure minicart position
+				ensureMinicartPosition();
 				
 				// Fix overlay positioning once more
 				fixOverlayPosition();
@@ -1168,18 +1280,27 @@ define([
 				
 				// Final check for template text
 				removeTemplateText();
+				
+				// One more check of minicart position after everything else is loaded
+				setTimeout(ensureMinicartPosition, 500);
 			});
 			
 			// Handle resize events
 			$(window).on('resize', function() {
 				// Recalculate scrollbar width on resize
 				calculateScrollbarWidth();
+				
+				// Check minicart position again on resize
+				ensureMinicartPosition();
 			});
 			
 			// Periodically check for cart updates
 			setInterval(function() {
 				customerData.reload(['cart'], false);
 			}, 60000);  // Check every minute
+			
+			// Periodically ensure minicart position is maintained
+			setInterval(ensureMinicartPosition, 30000); // Check every 30 seconds
 		});
 	};
 });

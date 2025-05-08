@@ -44,6 +44,9 @@ define([
 				document.body.style.setProperty('top', `-${scrollPosition}px`, 'important');
 			}
 			
+			// Ensure minicart is positioned correctly at the top of viewport
+			$('#cd-minicart').css('top', '0');
+			
 			// Debug
 			console.log('Minicart should now be visible');
 		}

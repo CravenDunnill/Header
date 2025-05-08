@@ -3,18 +3,18 @@
 /* Fixed Mini Cart */
 .cd-minicart {
 	position: fixed !important;
-	top: -40px !important;
+	top: 0 !important; /* Changed from -40px to 0 */
 	right: -450px !important; /* Position off-screen */
 	width: 400px !important;
 	max-width: 90% !important;
-	height: 100dvh !important; /* Standard viewport height */
+	height: 100vh !important; /* Using vh instead of dvh for wider compatibility */
 	background: #fff !important;
 	box-shadow: -5px 0 15px rgba(0,0,0,0.1) !important;
 	transition: right 0.3s ease, visibility 0.3s ease, opacity 0.3s ease !important;
 	z-index: 9999 !important;
 	display: flex !important;
 	flex-direction: column !important;
-	overflow: hidden !important; /* Changed from auto to hidden */
+	overflow: hidden !important;
 	visibility: hidden !important;
 	opacity: 0 !important;
 }
@@ -59,7 +59,7 @@
 	overflow-y: auto;
 	padding: 20px;
 	min-height: 100px;
-	max-height: calc(100dvh - 180px); /* Reduced to make room for footer */
+	max-height: calc(100vh - 180px); /* Reduced to make room for footer */
 }
 
 /* Items total */

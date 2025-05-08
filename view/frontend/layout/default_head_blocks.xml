@@ -3,5 +3,8 @@
 	<head>
 		<css src="CravenDunnill_Header::css/header.css"/>
 		<css src="CravenDunnill_Header::css/minicart.css"/>
+		
+		<!-- Critical CSS for early loading -->
+		<css src="CravenDunnill_Header::css/critical.css"/>
 	</head>
 </page>

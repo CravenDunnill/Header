@@ -16,64 +16,66 @@
 			<block class="CravenDunnill\Header\Block\Html\Header" name="custom.header" template="CravenDunnill_Header::html/header.phtml" after="-">
 				<!-- Cart icons template -->
 				<block class="Magento\Framework\View\Element\Template" name="cart_icons" template="CravenDunnill_Header::html/cart-icons.phtml"/>
-				
-				<!-- Minicart content -->
-				<block class="Magento\Checkout\Block\Cart\Sidebar" name="minicart_content" template="CravenDunnill_Header::ko/checkout/minicart.phtml">
-					<arguments>
-						<argument name="jsLayout" xsi:type="array">
-							<item name="components" xsi:type="array">
-								<item name="minicart_content" xsi:type="array">
-									<item name="component" xsi:type="string">Magento_Checkout/js/view/minicart</item>
-									<item name="config" xsi:type="array">
-										<item name="template" xsi:type="string">CravenDunnill_Header::ko/checkout/minicart.phtml</item>
-									</item>
-									<item name="children" xsi:type="array">
-										<item name="subtotal.container" xsi:type="array">
-											<item name="component" xsi:type="string">uiComponent</item>
-											<item name="config" xsi:type="array">
-												<item name="displayArea" xsi:type="string">subtotalContainer</item>
-											</item>
-											<item name="children" xsi:type="array">
-												<item name="subtotal" xsi:type="array">
-													<item name="component" xsi:type="string">Magento_Checkout/js/view/checkout/minicart/subtotal</item>
-													<item name="config" xsi:type="array">
-														<item name="template" xsi:type="string">CravenDunnill_Header::ko/checkout/cart/subtotal.phtml</item>
-													</item>
+			</block>
+		</referenceContainer>
+		
+		<!-- Move the minicart to the root level of the page body -->
+		<referenceContainer name="page.wrapper">
+			<block class="Magento\Checkout\Block\Cart\Sidebar" name="minicart_content" template="CravenDunnill_Header::ko/checkout/minicart.phtml">
+				<arguments>
+					<argument name="jsLayout" xsi:type="array">
+						<item name="components" xsi:type="array">
+							<item name="minicart_content" xsi:type="array">
+								<item name="component" xsi:type="string">Magento_Checkout/js/view/minicart</item>
+								<item name="config" xsi:type="array">
+									<item name="template" xsi:type="string">CravenDunnill_Header::ko/checkout/minicart.phtml</item>
+								</item>
+								<item name="children" xsi:type="array">
+									<item name="subtotal.container" xsi:type="array">
+										<item name="component" xsi:type="string">uiComponent</item>
+										<item name="config" xsi:type="array">
+											<item name="displayArea" xsi:type="string">subtotalContainer</item>
+										</item>
+										<item name="children" xsi:type="array">
+											<item name="subtotal" xsi:type="array">
+												<item name="component" xsi:type="string">Magento_Checkout/js/view/checkout/minicart/subtotal</item>
+												<item name="config" xsi:type="array">
+													<item name="template" xsi:type="string">CravenDunnill_Header::ko/checkout/cart/subtotal.phtml</item>
 												</item>
 											</item>
 										</item>
-										<item name="extra_info" xsi:type="array">
-											<item name="component" xsi:type="string">Magento_Checkout/js/view/checkout/minicart/extra-info</item>
-											<item name="displayArea" xsi:type="string">extraInfo</item>
+									</item>
+									<item name="extra_info" xsi:type="array">
+										<item name="component" xsi:type="string">Magento_Checkout/js/view/checkout/minicart/extra-info</item>
+										<item name="displayArea" xsi:type="string">extraInfo</item>
+									</item>
+									<item name="promotion" xsi:type="array">
+										<item name="component" xsi:type="string">Magento_Checkout/js/view/checkout/minicart/promotion</item>
+										<item name="config" xsi:type="array">
+											<item name="template" xsi:type="string">Magento_Checkout/minicart/promotion</item>
 										</item>
-										<item name="promotion" xsi:type="array">
-											<item name="component" xsi:type="string">Magento_Checkout/js/view/checkout/minicart/promotion</item>
-											<item name="config" xsi:type="array">
-												<item name="template" xsi:type="string">Magento_Checkout/minicart/promotion</item>
-											</item>
+									</item>
+									<item name="item.renderer" xsi:type="array">
+										<item name="component" xsi:type="string">Magento_Checkout/js/view/checkout/minicart/item/default</item>
+										<item name="config" xsi:type="array">
+											<item name="template" xsi:type="string">CravenDunnill_Header::ko/checkout/cart/item/default.phtml</item>
+											<item name="displayArea" xsi:type="string">defaultRenderer</item>
 										</item>
-										<item name="item.renderer" xsi:type="array">
-											<item name="component" xsi:type="string">Magento_Checkout/js/view/checkout/minicart/item/default</item>
-											<item name="config" xsi:type="array">
-												<item name="template" xsi:type="string">CravenDunnill_Header::ko/checkout/cart/item/default.phtml</item>
-												<item name="displayArea" xsi:type="string">defaultRenderer</item>
-											</item>
-											<item name="children" xsi:type="array">
-												<item name="item.image" xsi:type="array">
-													<item name="component" xsi:type="string">Magento_Catalog/js/view/image</item>
-													<item name="config" xsi:type="array">
-														<item name="template" xsi:type="string">Magento_Catalog/product/image</item>
-														<item name="displayArea" xsi:type="string">itemImage</item>
-													</item>
+										<item name="children" xsi:type="array">
+											<item name="item.image" xsi:type="array">
+												<item name="component" xsi:type="string">Magento_Catalog/js/view/image</item>
+												<item name="config" xsi:type="array">
+													<item name="template" xsi:type="string">Magento_Catalog/product/image</item>
+													<item name="displayArea" xsi:type="string">itemImage</item>
 												</item>
 											</item>
 										</item>
 									</item>
 								</item>
 							</item>
-						</argument>
-					</arguments>
-				</block>
+						</item>
+					</argument>
+				</arguments>
 			</block>
 		</referenceContainer>
 		
