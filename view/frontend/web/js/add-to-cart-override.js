@@ -27,7 +27,19 @@ define([
 			}, 1000);
 		});
 		
-		// 2. Direct click handler for the add to cart button
+		// 2. Handle tile sample forms specifically
+		$(document).on('submit', 'form[data-role="tile-sample-form"]', function(e) {
+			console.log('[CD] Tile sample form submitted');
+			
+			// Don't interfere with the tile sample handler
+			// Just set up a fallback timeout
+			setTimeout(function() {
+				console.log('[CD] Fallback: Opening minicart after tile sample form');
+				forceOpenMinicart();
+			}, 2000);
+		});
+		
+		// 3. Direct click handler for the add to cart button
 		$(document).on('click', 'button.tocart', function(e) {
 			console.log('[CD] Add to cart button clicked');
 			
@@ -38,11 +50,23 @@ define([
 			}, 1000);
 		});
 		
-		// 3. Global AJAX interception
+		// 4. Handle tile sample buttons specifically
+		$(document).on('click', '.tile-sample-button:not(.tile-sample-button-disabled)', function(e) {
+			console.log('[CD] Tile sample button clicked');
+			
+			// Don't interfere with the tile sample handler
+			// Just set up a fallback timeout
+			setTimeout(function() {
+				console.log('[CD] Fallback: Opening minicart after tile sample button');
+				forceOpenMinicart();
+			}, 2000);
+		});
+		
+		// 5. Global AJAX interception
 		$(document).ajaxComplete(function(event, xhr, settings) {
 			// If this was an add-to-cart request
-			if (settings.url.indexOf('checkout/cart/add') > -1) {
-				console.log('[CD] Detected add-to-cart AJAX completion');
+			if (settings.url.indexOf('checkout/cart/add') > -1 || settings.url.indexOf('tilesample/cart/add') > -1) {
+				console.log('[CD] Detected add-to-cart AJAX completion for URL:', settings.url);
 				forceOpenMinicart();
 			}
 		});
@@ -94,6 +118,9 @@ define([
 		customerData.reload(['cart'], true).done(function() {
 			console.log('[CD] Cart data reloaded, opening minicart...');
 			
+			// Ensure minicart is positioned correctly
+			ensureMinicartPosition();
+			
 			// Forcefully apply all the effects
 			$('#cd-minicart').addClass('active');
 			$('#cd-overlay').css('display', 'block');
@@ -130,6 +157,41 @@ define([
 			refreshMinicartContent();
 		});
 	};
+	
+	// Function to ensure minicart is positioned correctly
+	function ensureMinicartPosition() {
+		var $minicart = $('#cd-minicart');
+		
+		if ($minicart.length) {
+			// Make sure it's at body level
+			if (!$minicart.parent().is('body')) {
+				console.log('[CD] Moving minicart to body level');
+				$minicart.detach().appendTo('body');
+			}
+			
+			// Ensure proper styling
+			$minicart.css({
+				'position': 'fixed',
+				'top': '0',
+				'z-index': '9999',
+				'height': '100vh'
+			});
+			
+			if (window.innerWidth <= 767) {
+				$minicart.css({
+					'width': '100%',
+					'max-width': '100%',
+					'right': '-100%'
+				});
+			} else {
+				$minicart.css({
+					'width': '400px',
+					'max-width': '90%',
+					'right': '-450px'
+				});
+			}
+		}
+	}
 	
 	// Function to refresh minicart content
 	function refreshMinicartContent() {
@@ -168,6 +230,12 @@ define([
 	// Add global event listener for custom events
 	$(document).on('product:added', function() {
 		console.log('[CD] Custom product:added event detected');
+		forceOpenMinicart();
+	});
+	
+	// Add specific listener for tile sample events
+	$(document).on('tile-sample:added', function() {
+		console.log('[CD] Tile sample added event detected');
 		forceOpenMinicart();
 	});
 	
