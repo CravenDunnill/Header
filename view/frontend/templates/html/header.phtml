@@ -39,7 +39,20 @@
 				<span>Account</span>
 			</a>
 			
-			<!-- Cart icon will be placed here by cart-icons.phtml -->
+			<!-- Minicart Trigger -->
+			<div class="cd-header-icon cd-minicart-trigger" data-block="minicart" data-role="dropdownDialog-toggle">
+				<a class="action showcart" href="#" data-bind="scope: 'minicart_content'">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="9" cy="21" r="1"></circle>
+						<circle cx="20" cy="21" r="1"></circle>
+						<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+					</svg>
+					<span class="counter qty" data-bind="css: { empty: !!getCartParam('summary_count') == false }, blockLoader: isLoading">
+						<span class="counter-number"><!-- ko text: getCartParam('summary_count') --><!-- /ko --></span>
+					</span>
+					<span>Trolley</span>
+				</a>
+			</div>
 		</div>
 	</div>
 
@@ -81,7 +94,19 @@
 				</svg>
 			</a>
 			
-			<!-- Mobile cart icon will be placed here by cart-icons.phtml -->
+			<!-- Mobile Minicart Trigger -->
+			<div class="cd-header-icon-mobile cd-minicart-trigger-mobile" data-block="minicart" data-role="dropdownDialog-toggle">
+				<a class="action showcart" href="#" data-bind="scope: 'minicart_content'">
+					<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#122C58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="9" cy="21" r="1"></circle>
+						<circle cx="20" cy="21" r="1"></circle>
+						<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+					</svg>
+					<span class="counter qty" data-bind="css: { empty: !!getCartParam('summary_count') == false }, blockLoader: isLoading">
+						<span class="counter-number"><!-- ko text: getCartParam('summary_count') --><!-- /ko --></span>
+					</span>
+				</a>
+			</div>
 		</div>
 	</div>
 	
@@ -107,18 +132,6 @@
 			</form>
 		</div>
 	</div>
-	
-	<!-- Cart Icons -->
-	<?= $block->getChildHtml('cart_icons') ?>
-	
-	<!-- Add to cart handler initialization -->
-	<script type="text/x-magento-init">
-	{
-		"*": {
-			"cravendunnill-add-to-cart-override": {}
-		}
-	}
-	</script>
 	
 	<!-- Mobile Menu Slide-out -->
 	<div class="cd-mobile-menu" id="cd-mobile-menu">
@@ -221,248 +234,28 @@
 	<div class="cd-overlay" id="cd-overlay"></div>
 	
 	<script>
-		// IMPORTANT: This script moves the overlay to prevent it from covering the header
-		(function() {
-			// Function to reposition the overlay so it doesn't cover header
-			function fixOverlayPosition() {
-				var overlay = document.getElementById('cd-overlay');
-				var pageMain = document.querySelector('.page-main');
-				
-				if (overlay && pageMain) {
-					// Only move if not already positioned correctly
-					if (overlay.parentNode !== pageMain) {
-						// Clone the overlay to preserve event handlers
-						var newOverlay = overlay.cloneNode(true);
-						
-						// Remove the original
-						overlay.parentNode.removeChild(overlay);
-						
-						// Add the clone to page-main
-						pageMain.insertBefore(newOverlay, pageMain.firstChild);
-						
-						// Fix positioning
-						newOverlay.style.position = 'absolute';
-						newOverlay.style.top = '0';
-						newOverlay.style.left = '0';
-						newOverlay.style.right = '0';
-						newOverlay.style.bottom = '0';
-						newOverlay.style.zIndex = '100';
-						
-						// Reattach event listeners if needed
-						newOverlay.addEventListener('click', function() {
-							document.getElementById('cd-search-panel').style.display = 'none';
-							newOverlay.style.display = 'none';
-							
-							// Close mini cart if open
-							var minicart = document.getElementById('cd-minicart');
-							if (minicart) {
-								minicart.classList.remove('active');
-							}
-							
-							// Close mobile menu if open
-							var mobileMenu = document.getElementById('cd-mobile-menu');
-							if (mobileMenu) {
-								mobileMenu.classList.remove('active');
-							}
-							
-							// Remove blur from all elements
-							document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
-								if (el) el.style.filter = 'none';
-							});
-						});
-					}
-				}
-				
-				// Ensure header elements have the highest z-index
-				var headerElements = [
-					'.page-header',
-					'header.page-header',
-					'.cd-header-container',
-					'.cd-header-desktop',
-					'.cd-header-mobile',
-					'.cd-header-left',
-					'.cd-header-right',
-					'.cd-header-center'
-				];
-				
-				headerElements.forEach(function(selector) {
-					document.querySelectorAll(selector).forEach(function(el) {
-						if (el) {
-							el.style.position = 'relative';
-							el.style.zIndex = '1200';
-							el.style.filter = 'none';
-							el.style.opacity = '1';
-							el.style.visibility = 'visible';
-						}
-					});
-				});
-			}
-			
-			// Run immediately
-			fixOverlayPosition();
-			
-			// Also run when DOM is ready
-			document.addEventListener('DOMContentLoaded', function() {
-				console.log('Header overlay fix loaded');
-				fixOverlayPosition();
-				
-				// Enhanced close button functionality
-				var searchCloseButton = document.getElementById('cd-search-close');
-				if (searchCloseButton) {
-					// Remove any existing handlers
-					var newSearchCloseButton = searchCloseButton.cloneNode(true);
-					searchCloseButton.parentNode.replaceChild(newSearchCloseButton, searchCloseButton);
-					
-					// Add new, more direct handler
-					newSearchCloseButton.addEventListener('click', function(e) {
-						e.preventDefault();
-						e.stopPropagation();
-						console.log('Search close button clicked - enhanced inline handler');
-						
-						// Hide search panel
-						var searchPanel = document.getElementById('cd-search-panel');
-						if (searchPanel) searchPanel.style.display = 'none';
-						
-						// Find and hide overlay (handle both relocated and original positions)
-						var pageMainOverlay = document.querySelector('.page-main #cd-overlay');
-						if (pageMainOverlay) pageMainOverlay.style.display = 'none';
-						
-						var originalOverlay = document.querySelector('#cd-overlay:not(.page-main #cd-overlay)');
-						if (originalOverlay) originalOverlay.style.display = 'none';
-						
-						// Remove blur from content
-						document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
-							if (el) el.style.filter = 'none';
-						});
-						
-						return false;
-					});
-				}
-				
-				// Search button click handler
-				document.getElementById('cd-search-button').addEventListener('click', function(e) {
-					e.preventDefault();
-					console.log('Search button clicked');
-					
-					// Ensure overlay is properly positioned
-					fixOverlayPosition();
-					
-					// Now, safely display the search panel
-					document.getElementById('cd-search-panel').style.display = 'block';
-					
-					// Get the repositioned overlay
-					var overlay = document.querySelector('.page-main #cd-overlay');
-					if (overlay) {
-						overlay.style.display = 'block';
-					}
-					
-					// Apply blur only to main content
-					document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
-						if (el) el.style.filter = 'blur(4px)';
-					});
-					
-					// Force header elements to be visible
-					document.querySelectorAll('.page-header, header.page-header, .cd-header-container').forEach(function(el) {
-						if (el) {
-							el.style.position = 'relative';
-							el.style.zIndex = '1200';
-							el.style.filter = 'none';
-							el.style.opacity = '1';
-							el.style.visibility = 'visible';
-						}
-					});
-					
-					// Focus search input
-					setTimeout(function() {
-						document.getElementById('cd-search-input').focus();
-					}, 100);
-				});
-				
-				// Also add handler for mobile search button
-				if (document.getElementById('cd-search-button-mobile')) {
-					document.getElementById('cd-search-button-mobile').addEventListener('click', function(e) {
-						e.preventDefault();
-						console.log('Mobile search button clicked');
-						
-						// Ensure overlay is properly positioned
-						fixOverlayPosition();
-						
-						// Now, safely display the search panel
-						document.getElementById('cd-search-panel').style.display = 'block';
-						
-						// Get the repositioned overlay
-						var overlay = document.querySelector('.page-main #cd-overlay');
-						if (overlay) {
-							overlay.style.display = 'block';
-						}
-						
-						// Apply blur only to main content
-						document.querySelectorAll('.page-main, .page-footer, .nav-sections, .breadcrumbs').forEach(function(el) {
-							if (el) el.style.filter = 'blur(4px)';
-						});
-						
-						// Force header elements to be visible
-						document.querySelectorAll('.page-header, header.page-header, .cd-header-container').forEach(function(el) {
-							if (el) {
-								el.style.position = 'relative';
-								el.style.zIndex = '1200';
-								el.style.filter = 'none';
-								el.style.opacity = '1';
-								el.style.visibility = 'visible';
-							}
-						});
-						
-						// Focus search input
-						setTimeout(function() {
-							document.getElementById('cd-search-input').focus();
-						}, 100);
-					});
-				}
-			});
-			
-			// Also run on window load
-			window.addEventListener('load', fixOverlayPosition);
-		})();
-	</script>
-	
-	<!-- Mobile menu JavaScript -->
-	<script>
 	require(['jquery'], function($) {
 		'use strict';
 		
 		$(document).ready(function() {
 			// Function to prevent body scroll
 			function preventBodyScroll() {
-				// Save current scroll position
 				var scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-				
-				// Store this value so we can restore it later
 				window.lastScrollPosition = scrollPosition;
-				
-				// Apply necessary classes
 				document.documentElement.classList.add('scroll-locked');
 				document.body.classList.add('scroll-locked');
-				
-				// Make absolutely sure the body is locked at the current scroll position
-				setTimeout(function() {
-					document.body.style.setProperty('top', `-${scrollPosition}px`, 'important');
-				}, 0);
+				document.body.style.setProperty('top', `-${scrollPosition}px`, 'important');
 			}
 
 			// Function to allow body scroll
 			function allowBodyScroll() {
-				// Remove applied classes
 				document.documentElement.classList.remove('scroll-locked');
 				document.body.classList.remove('scroll-locked');
-				
-				// Reset any inline styles
 				document.body.style.removeProperty('overflow');
 				document.body.style.removeProperty('position');
 				document.body.style.removeProperty('height');
 				document.body.style.removeProperty('width');
 				document.body.style.removeProperty('top');
-				
-				// Restore scroll position
 				const scrollPosition = window.lastScrollPosition || 0;
 				window.scrollTo(0, scrollPosition);
 			}
@@ -522,6 +315,44 @@
 				return false;
 			});
 			
+			// Search button functionality
+			$('#cd-search-button, #cd-search-button-mobile').on('click', function(e) {
+				e.preventDefault();
+				console.log('Search button clicked');
+				
+				// Now, safely display the search panel
+				$('#cd-search-panel').css('display', 'block');
+				
+				// Show overlay
+				$('#cd-overlay').css('display', 'block');
+				
+				// Apply blur only to main content
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'blur(4px)');
+				
+				// Force header elements to be visible
+				$('.page-header, header.page-header, .cd-header-container').css({
+					'position': 'relative',
+					'z-index': '1200',
+					'filter': 'none',
+					'opacity': '1',
+					'visibility': 'visible'
+				});
+				
+				// Focus search input
+				setTimeout(function() {
+					$('#cd-search-input').focus();
+				}, 100);
+			});
+			
+			// Search close button
+			$('#cd-search-close').on('click', function(e) {
+				e.preventDefault();
+				
+				$('#cd-search-panel').hide();
+				$('#cd-overlay').hide();
+				$('.page-main, .page-footer, .nav-sections, .breadcrumbs').css('filter', 'none');
+			});
+			
 			// Overlay click
 			$('#cd-overlay').on('click', function() {
 				console.log('Overlay clicked');
@@ -557,170 +388,11 @@
 	</script>
 </div>
 
-
-<!-- Emergency Mobile Cart Fix -->
-<style>
-@media screen and (max-width: 767px) {
-	/* Force minicart to display correctly */
-	.cd-minicart {
-		top: 0 !important;
-		right: -100vw !important;
-		width: 100vw !important;
-		height: 100vh !important;
-		position: fixed !important;
-		z-index: 99999 !important;
-		transition: none !important;
-		transform: none !important;
-		display: block !important;
-		background-color: #fff !important;
-	}
-	
-	.cd-minicart.active {
-		right: 0 !important;
-		opacity: 1 !important;
-		visibility: visible !important;
-	}
-	
-	/* Fix body scroll issues */
-	html.scroll-locked,
-	body.scroll-locked {
-		overflow: hidden !important;
-		height: 100% !important;
-		width: 100% !important;
-		position: fixed !important;
-	}
-	
-	/* Make content visible */
-	.cd-minicart-content {
-		display: block !important;
-		visibility: visible !important;
-		max-height: 70vh !important;
+<!-- Initialize minicart -->
+<script type="text/x-magento-init">
+{
+	"[data-block='minicart']": {
+		"Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
 	}
 }
-</style>
-
-<script>
-// Emergency Mobile Cart Fix
-(function() {
-	// Only run on mobile
-	if (window.innerWidth > 767) return;
-	
-	console.log("Mobile cart emergency fix active");
-	
-	// Define simple open minicart function
-	window.mobileOpenCart = function() {
-		console.log("Mobile: Opening cart");
-		
-		// Force display settings
-		document.getElementById('cd-minicart').style.display = 'block';
-		document.getElementById('cd-minicart').style.visibility = 'visible';
-		document.getElementById('cd-minicart').style.opacity = '1';
-		document.getElementById('cd-minicart').style.right = '0';
-		document.getElementById('cd-minicart').classList.add('active');
-		
-		// Show overlay
-		document.getElementById('cd-overlay').style.display = 'block';
-		
-		// Lock scrolling
-		document.documentElement.style.overflow = 'hidden';
-		document.body.style.overflow = 'hidden';
-		document.body.style.position = 'fixed';
-		document.body.style.width = '100%';
-		document.body.style.height = '100%';
-		
-		return false;
-	};
-	
-	// Override existing functions
-	window.forceOpenMinicart = window.mobileOpenCart;
-	
-	// Capture add to cart events
-	document.addEventListener('click', function(e) {
-		// Match add to cart buttons
-		if (e.target.matches('button.action.tocart') || 
-			e.target.closest('button.action.tocart')) {
-			console.log("Mobile: Detected add to cart click");
-			setTimeout(window.mobileOpenCart, 1000);
-		}
-	}, true);
-	
-	// Intercept AJAX cart requests
-	var origOpen = XMLHttpRequest.prototype.open;
-	XMLHttpRequest.prototype.open = function() {
-		this.addEventListener('load', function() {
-			if (this.responseURL && this.responseURL.indexOf('checkout/cart/add') > -1) {
-				console.log("Mobile: Detected cart AJAX success");
-				setTimeout(window.mobileOpenCart, 500);
-			}
-		});
-		origOpen.apply(this, arguments);
-	};
-})();
-</script>
-
-<!-- Mobile Cart Fix for Close Button -->
-<script>
-(function() {
-	// Only run on mobile
-	if (window.innerWidth > 767) return;
-	
-	console.log("Mobile cart close fix active");
-	
-	// Handle closing the cart
-	window.mobileCloseCart = function() {
-		console.log("Mobile: Closing cart");
-		
-		// Hide minicart
-		document.getElementById('cd-minicart').classList.remove('active');
-		document.getElementById('cd-minicart').style.right = '-100vw';
-		
-		// Hide overlay
-		document.getElementById('cd-overlay').style.display = 'none';
-		
-		// Unlock scrolling
-		document.documentElement.style.overflow = '';
-		document.documentElement.style.position = '';
-		document.documentElement.style.height = '';
-		document.documentElement.style.width = '';
-		
-		document.body.style.overflow = '';
-		document.body.style.position = '';
-		document.body.style.height = '';
-		document.body.style.width = '';
-		document.body.style.top = '';
-		
-		// Restore scroll position
-		var scrollY = parseInt(document.body.style.top || '0');
-		if (scrollY) {
-			window.scrollTo(0, Math.abs(scrollY));
-		}
-		
-		// Remove any other classes
-		document.documentElement.classList.remove('scroll-locked');
-		document.body.classList.remove('scroll-locked');
-		
-		return false;
-	};
-	
-	// Attach event handler to close button
-	document.addEventListener('click', function(e) {
-		if (e.target.matches('#cd-minicart-close') || 
-			e.target.closest('#cd-minicart-close')) {
-			return mobileCloseCart();
-		}
-		
-		// Also handle overlay clicks
-		if (e.target.matches('#cd-overlay')) {
-			return mobileCloseCart();
-		}
-	}, true);
-	
-	// Also override any existing close functions
-	var checkInterval = setInterval(function() {
-		if (document.getElementById('cd-minicart-close')) {
-			document.getElementById('cd-minicart-close').onclick = mobileCloseCart;
-			clearInterval(checkInterval);
-		}
-	}, 100);
-})();
 </script>

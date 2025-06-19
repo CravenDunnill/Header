@@ -92,4 +92,41 @@ class Header extends \Magento\Framework\View\Element\Template
 	{
 		return $this->getUrl('catalogsearch/result');
 	}
+	
+	/**
+	 * Get JS layout configuration for minicart
+	 *
+	 * @return string
+	 */
+	public function getJsLayout()
+	{
+		$jsLayout = [
+			'components' => [
+				'minicart_content' => [
+					'component' => 'Magento_Checkout/js/view/minicart',
+					'config' => [
+						'template' => 'Magento_Checkout/minicart/content'
+					],
+					'children' => [
+						'subtotal.container' => [
+							'component' => 'uiComponent',
+							'config' => [
+								'displayArea' => 'subtotalContainer'
+							],
+							'children' => [
+								'subtotal' => [
+									'component' => 'uiComponent',
+									'config' => [
+										'template' => 'Magento_Checkout/minicart/subtotal'
+									]
+								]
+							]
+						]
+					]
+				]
+			]
+		];
+		
+		return json_encode($jsLayout);
+	}
 }

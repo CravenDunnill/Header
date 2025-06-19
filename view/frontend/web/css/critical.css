@@ -1,35 +1,4 @@
-/* Critical CSS for minicart positioning */
-.cd-minicart {
-	position: fixed !important;
-	top: 0 !important;
-	right: -450px !important;
-	width: 400px !important;
-	max-width: 90% !important;
-	height: 100vh !important;
-	background: #fff !important;
-	box-shadow: -5px 0 15px rgba(0,0,0,0.1) !important;
-	transition: right 0.3s ease, visibility 0.3s ease, opacity 0.3s ease !important;
-	z-index: 9999 !important;
-	display: flex !important;
-	flex-direction: column !important;
-	overflow: hidden !important;
-	visibility: hidden !important;
-	opacity: 0 !important;
-}
-
-.cd-minicart.active {
-	right: 0 !important;
-	visibility: visible !important;
-	opacity: 1 !important;
-}
-
-@media screen and (max-width: 767px) {
-	.cd-minicart {
-		width: 100% !important;
-		max-width: 100% !important;
-		right: -100% !important;
-	}
-}
+/* Critical CSS for header positioning */
 
 /* Fixed header positioning */
 .page-header,
@@ -64,25 +33,9 @@ body.scroll-locked {
 	overscroll-behavior: none !important;
 }
 
-/* Pre-reserve space for header icons to prevent layout shifts */
+/* Pre-reserve space for header to prevent layout shifts */
 .cd-header-right,
 .cd-header-mobile-right {
 	min-height: 40px;
 	position: relative;
-}
-
-/* Pre-positions for cart icons to prevent jumps */
-#cd-cart-trigger, 
-#cd-cart-trigger-mobile {
-	opacity: 0;
-	visibility: hidden;
-	position: relative;
-	transition: opacity 0.2s ease;
-}
-
-/* When positioned, make them visible */
-.cd-header-right #cd-cart-trigger,
-.cd-header-mobile-right #cd-cart-trigger-mobile {
-	opacity: 1;
-	visibility: visible;
 }
